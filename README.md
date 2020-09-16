@@ -1,2 +1,2 @@
-# pot
+# PoT
 PoT
