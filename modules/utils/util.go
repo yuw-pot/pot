@@ -10,18 +10,18 @@ import (
 )
 
 type (
-	Utils struct {
+	PoT struct {
 
 	}
 )
 
-func New() *Utils {
-	return &Utils {
+func New() *PoT {
+	return &PoT {
 
 	}
 }
 
-func (u *Utils) Contains(k string, d ...interface{}) bool {
+func (u *PoT) Contains(k string, d ...interface{}) bool {
 	if len(d) < 1 {
 		return false
 	}

@@ -36,7 +36,7 @@ type (
 )
 
 func (route *PoT) Made(r *gin.Engine) {
-	var exp *exceptions.Exceptions = exceptions.New()
+	var exp *exceptions.PoT = exceptions.New()
 
 	/**
 	 * Todo: No Routes To Redirect

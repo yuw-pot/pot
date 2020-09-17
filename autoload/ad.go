@@ -8,25 +8,27 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
-	"github.com/yuw-pot/pot/modules/properties"
+	P "github.com/yuw-pot/pot/modules/properties"
 )
 
 type autoload struct {
-	prop *properties.PoT
+	prop *P.PoT
 }
 
 func init() {
 	ad := ad()
-	ad.property()
 
-	if properties.PropertyPoT == nil {
+	// Initialized Properties
+	// - assign the properties.PropertyPoT
+	ad.property()
+	if P.PropertyPoT == nil {
 		panic(E.Err(data.ErrPfx, "AdPropVar"))
 	}
 }
 
 func ad() *autoload {
 	return &autoload {
-		prop: properties.New(),
+		prop: P.New(),
 	}
 }
 
@@ -38,5 +40,9 @@ func (ad *autoload) property() {
 		panic(E.Err(data.ErrPfx, "AdPropBind"))
 	}
 
-	properties.PropertyPoT = ad.prop.Load()
+	P.PropertyPoT = ad.prop.Load()
+}
+
+func (ad *autoload) adapter() {
+
 }

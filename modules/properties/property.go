@@ -19,8 +19,8 @@ type (
 	PoT struct {
 		Prop *viper.Viper
 
-		us *utils.Utils
-		fs *files.Files
+		us *utils.PoT
+		fs *files.PoT
 	}
 )
 
@@ -70,10 +70,14 @@ func (cfg *PoT) Load() *PoT {
 	return cfg
 }
 
-func (cfg *PoT) Get(k string, v interface{}) interface{} {
+func (cfg *PoT) GeT(k string, v interface{}) interface{} {
 	if cfg.Prop.IsSet(k) {
 		return cfg.Prop.Get(k)
 	}
 
 	return v
+}
+
+func (cfg *PoT) TpL() string {
+	return ""
 }

@@ -11,18 +11,18 @@ import (
 	"net/http"
 )
 
-type Exceptions struct {}
+type PoT struct {}
 
-func New() *Exceptions {
-	return &Exceptions {}
+func New() *PoT {
+	return &PoT {}
 }
 
-func (exp *Exceptions) NoRoute(ctx *gin.Context) {
+func (exp *PoT) NoRoute(ctx *gin.Context) {
 	ctx.AbortWithError(http.StatusNotFound, err.Err(data.ErrPfx, "ErrDefault"))
 	return
 }
 
-func (exp *Exceptions) NoMethod(ctx *gin.Context) {
+func (exp *PoT) NoMethod(ctx *gin.Context) {
 	ctx.AbortWithError(http.StatusNotFound, err.Err(data.ErrPfx, "ErrDefault"))
 	return
 }

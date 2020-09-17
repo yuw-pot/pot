@@ -7,18 +7,18 @@ package files
 import "os"
 
 type (
-	Files struct {
+	PoT struct {
 
 	}
 )
 
-func New() *Files {
-	return &Files {
+func New() *PoT {
+	return &PoT {
 
 	}
 }
 
-func (fs *Files) IsExists(pathname string) (ok bool, err error) {
+func (fs *PoT) IsExists(pathname string) (ok bool, err error) {
 	_, err = os.Stat(pathname)
 	if err == nil {
 		return true, nil
@@ -31,14 +31,14 @@ func (fs *Files) IsExists(pathname string) (ok bool, err error) {
 	return
 }
 
-func (fs *Files) Open(pathname string) (f *os.File, err error) {
+func (fs *PoT) Open(pathname string) (f *os.File, err error) {
 	f, err = os.Open(pathname)
 	defer f.Close()
 
 	return
 }
 
-func (fs *Files) Create(pathname string) (f *os.File, err error) {
+func (fs *PoT) Create(pathname string) (f *os.File, err error) {
 	f, err = os.Create(pathname)
 	defer f.Close()
 
