@@ -51,8 +51,8 @@ func (engine *PoT) Run() {
 
 	// GeT Log Configure
 	// - data.ZLogPoT construct
-	var zLogPoT *data.ZLogPoT
-	_ = P.PropertyPoT.Prop.UnmarshalKey("Logs.PoT", &zLogPoT)
+	var zLogPoT *data.ZLogPoT = nil
+	_ = P.PropertyPoT.UsK("Logs.PoT", &zLogPoT)
 	if zLogPoT == nil {
 		panic(E.Err(data.ErrPfx, "PoTZapLogErr"))
 	}
@@ -76,10 +76,35 @@ func (engine *PoT) Run() {
 
 	R.RPoT.Made(r)
 
-	//   - Run Http Server
-	rErr := r.Run(":" + cast.ToString(P.PropertyPoT.GeT("PoT.Port", ginPort)))
+	// Https Power ON/OFF
+	//   - PoT.Hssl
+	//     - PoT.Hssl.Power
+	//     - PoT.Hssl.CertFile
+	//     - PoT.Hssl.KeysFile
+	var rErr error
+	strPoTPort := ":"+cast.ToString(P.PropertyPoT.GeT("PoT.Port", ginPort))
+
+	if P.PropertyPoT.GeT("PoT.Hssl.Power", 0) == 1 {
+		PoTHsslCertFile := cast.ToString(P.PropertyPoT.GeT("PoT.Hssl.CertFile", ""))
+		if PoTHsslCertFile == "" {
+			panic(E.Err(data.ErrPfx, "PoTSslCF"))
+		}
+
+		PoTHsslKeysFile := cast.ToString(P.PropertyPoT.GeT("PoT.Hssl.KeysFile", ""))
+		if PoTHsslKeysFile == "" {
+			panic(E.Err(data.ErrPfx, "PoTSslKF"))
+		}
+
+		//   - Run Https Server (SSL)
+		rErr = r.RunTLS(strPoTPort, PoTHsslCertFile, PoTHsslKeysFile)
+
+	} else {
+		//   - Run Http Server
+		rErr = r.Run(strPoTPort)
+	}
+
 	if rErr != nil {
-		zLogMade.Fatal("HTTP Server Start Failure", zLog.ZErr(rErr))
+		zLogMade.Fatal("PoT Server Start Failure", zLog.ZErr(rErr))
 	}
 }
 

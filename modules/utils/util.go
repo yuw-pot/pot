@@ -6,7 +6,10 @@ package utils
 
 import (
 	"github.com/spf13/cast"
+	"github.com/yuw-pot/pot/data"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 type (
@@ -21,13 +24,21 @@ func New() *PoT {
 	}
 }
 
-func (u *PoT) Contains(k string, d ...interface{}) bool {
+func (u *PoT) SetTimeLocation(d string) (*time.Location, error) {
+	if d == "" {
+		d = data.TimeLocation
+	}
+
+	return time.LoadLocation(d)
+}
+
+func (u *PoT) Contains(k interface{}, d ...interface{}) bool {
 	if len(d) < 1 {
 		return false
 	}
 
 	for _, v := range d {
-		if strings.Contains(k, cast.ToString(v)) {
+		if strings.Contains(cast.ToString(k), cast.ToString(v)) {
 			return true
 		}
 	}
@@ -35,12 +46,7 @@ func (u *PoT) Contains(k string, d ...interface{}) bool {
 	return false
 }
 
-//func (u *Utils) Merge(d ...*data.H) (src *data.H) {
-//	if len(d) < 1 {
-//		return
-//	}
-//
-//
-//
-//	return
-//}
+func (u *PoT) NumRandom(min, max int) int {
+	rand.Seed(time.Now().Unix())
+	return rand.Intn(max-min) + min
+}

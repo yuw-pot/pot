@@ -78,6 +78,10 @@ func (cfg *PoT) GeT(k string, v interface{}) interface{} {
 	return v
 }
 
+func (cfg *PoT) UsK(k string, v interface{}, opts ...viper.DecoderConfigOption) error {
+	return cfg.Prop.UnmarshalKey(k, v, opts ...)
+}
+
 func (cfg *PoT) TpL() string {
 	return ""
 }
