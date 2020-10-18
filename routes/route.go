@@ -61,7 +61,7 @@ func (route *PoT) Made(r *gin.Engine) {
 	}
 }
 
-func To(g *gin.RouterGroup, toFunc map[string][]gin.HandlerFunc) {
+func To(ctx *gin.RouterGroup, toFunc map[string][]gin.HandlerFunc) {
 	for r, ctrl := range toFunc {
 		x := strings.Split(r, data.RSeP)
 
@@ -73,15 +73,23 @@ func To(g *gin.RouterGroup, toFunc map[string][]gin.HandlerFunc) {
 
 		switch strings.ToLower(x[1]) {
 		case "get":
-			g.GET (x[2], ctrl ...)
+			ctx.GET (x[2], ctrl ...)
 			continue
 
 		case "any":
-			g.Any (x[2], ctrl ...)
+			ctx.Any (x[2], ctrl ...)
 			continue
 
 		case "post":
-			g.POST(x[2], ctrl ...)
+			ctx.POST(x[2], ctrl ...)
+			continue
+
+		case "delete":
+			ctx.DELETE(x[2], ctrl ...)
+			continue
+
+		case "put":
+			ctx.PUT(x[2], ctrl ...)
 			continue
 
 		default:

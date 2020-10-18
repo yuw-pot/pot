@@ -33,14 +33,10 @@ func (fs *PoT) IsExists(pathname string) (ok bool, err error) {
 
 func (fs *PoT) Open(pathname string) (f *os.File, err error) {
 	f, err = os.Open(pathname)
-	defer f.Close()
-
 	return
 }
 
 func (fs *PoT) Create(pathname string) (f *os.File, err error) {
 	f, err = os.Create(pathname)
-	defer f.Close()
-
 	return
 }

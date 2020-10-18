@@ -28,7 +28,7 @@ const (
 
 type (
 	PoT struct {
-		Us *U.PoT
+		vPoT *U.PoT
 		dn interface{}
 		name string
 		sConns *srcConns
@@ -75,8 +75,8 @@ var (
 )
 
 func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, error) {
-	Us := U.New()
-	if ok := Us.Contains(driverName, dNames); ok == false {
+	v := U.New()
+	if ok := v.Contains(driverName, dNames); ok == false {
 		return nil, E.Err(data.ErrPfx, "AdapterMadeDN")
 	}
 
@@ -85,7 +85,7 @@ func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, e
 	if len(mode) == 0 {
 		modeAdapter = Master
 	} else {
-		if ok := Us.Contains(mode[0], dModes); ok {
+		if ok := v.Contains(mode[0], dModes); ok {
 			modeAdapter = mode[0]
 		} else {
 			return nil, E.Err(data.ErrPfx, "AdapterMadeMode")
@@ -130,18 +130,18 @@ func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, e
 	)
 
 	if len(mode) == 0 {
-		return adapterMaster[driverName][name][Us.NumRandom(0, mLen)], nil
+		return adapterMaster[driverName][name][v.NumRandom(0, mLen)], nil
 	}
 
 	var x *xorm.Engine
 
 	switch strings.ToLower(cast.ToString(mode[0])) {
 	case "master":
-		x =  adapterMaster[driverName][name][Us.NumRandom(0, mLen)]
+		x =  adapterMaster[driverName][name][v.NumRandom(0, mLen)]
 		break
 
 	case "slaver":
-		x =  adapterSlaver[driverName][name][Us.NumRandom(0, sLen)]
+		x =  adapterSlaver[driverName][name][v.NumRandom(0, sLen)]
 		break
 
 	default:
@@ -153,7 +153,7 @@ func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, e
 
 func New() *PoT {
 	return &PoT {
-		Us: U.New(),
+		vPoT: U.New(),
 	}
 }
 
@@ -161,7 +161,7 @@ func (adapterPoT *PoT) Made() {
 	// Set db Time Location
 	//   - GeT Configure
 	adapterTimeLocation := P.PropertyPoT.GeT("PoT.TimeLocation", data.TimeLocation)
-	d, err := adapterPoT.Us.SetTimeLocation(cast.ToString(adapterTimeLocation))
+	d, err := adapterPoT.vPoT.SetTimeLocation(cast.ToString(adapterTimeLocation))
 	if err != nil {
 		panic(err)
 	}

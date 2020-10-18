@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/yuw-pot/pot/data"
 	A "github.com/yuw-pot/pot/modules/adapter"
+	R "github.com/yuw-pot/pot/modules/cache/redis"
 	E "github.com/yuw-pot/pot/modules/err"
 	P "github.com/yuw-pot/pot/modules/properties"
 	U "github.com/yuw-pot/pot/modules/utils"
@@ -15,7 +16,7 @@ import (
 
 type autoload struct {
 	prop *P.PoT
-	Us *U.PoT
+	vPoT *U.PoT
 }
 
 func init() {
@@ -24,6 +25,7 @@ func init() {
 	// Initialized Properties
 	//   - assign the properties.PropertyPoT
 	ad.property()
+
 	if P.PropertyPoT == nil {
 		panic(E.Err(data.ErrPfx, "AdPropVar"))
 	}
@@ -39,15 +41,16 @@ func init() {
 		A.New().Made()
 	}
 
+	// Initialized Redis
 	if adPowerPoT.Redis == 1 {
-		ad.redis()
+		R.New().Made()
 	}
 }
 
 func ad() *autoload {
 	return &autoload {
 		prop: P.New(),
-		Us: U.New(),
+		vPoT: U.New(),
 	}
 }
 
@@ -60,8 +63,4 @@ func (ad *autoload) property() {
 	}
 
 	P.PropertyPoT = ad.prop.Load()
-}
-
-func (ad *autoload) redis() {
-
 }

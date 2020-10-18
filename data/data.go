@@ -4,44 +4,18 @@
 
 package data
 
-import "github.com/gin-gonic/gin"
-
 const (
+	PoT	string = "PoT"
+
+	// Mode
+	DebugMode	string = "debug"
+	ReleaseMode	string = "release"
+
 	// Time Location
 	TimeLocation	string = "Asia/Shanghai"
 
-	// Err Message Keywords
-	ErrPfx 		string = "PoT"
-
-	// Property File Suffix
-	EnvDEV 		string = "dev"
-	EnvSTG 		string = "stg"
-	EnvPRD 		string = "prd"
-	PropertySfx string = "yaml"
-
 	// Route Separated
 	RSeP 		string = "->"
-
-	// Zap Log Constant
-	//   - LogFormat
-	//   - LogFormatConsole
-	//   - EncoderConfigure
-	LogFormatJson 		string = "json"
-	LogFormatConsole 	string = "console"
-
-	LogTime 			string = "time"
-	LogLevel 			string = "level"
-	LogName 			string = "logger"
-	LogCaller 			string = "caller"
-	LogMessage 			string = "msg"
-	LogStackTrace 		string = "stacktrace"
-
-	// - Log Size -> 1M
-	LogMaxSize 			int = 1
-	// - Keep Days
-	LogMaxBackups 		int = 5
-	// - Keep Files Counts
-	LogMaxAge 			int = 7
 
 	// Models
 	ModONE		string = "ONE"
@@ -51,53 +25,9 @@ const (
 )
 
 var (
-	PoTMode []string = []string{
-		gin.DebugMode,
-		gin.ReleaseMode,
-	}
-
-	/**
-	 * Modules: Errors
-	 */
-	ErrMsg *ErrH = &ErrH{
-		ErrPfx: {
-			"ErrDefault":		"Unknown Error",
-
-			"PoTModeErr":		"Error PoT.Mode Parameters (0->debug|1->release) in the file of .("+EnvDEV+"|"+EnvSTG+"|"+EnvPRD+").yaml",
-			"PoTZapLogErr":		"Error Logs.PoT Parameters",
-			"PoTSslCF":			"Missing SSL Cert File",
-			"PoTSslKF":			"Missing SSL Key File",
-
-			"ModParamsErr":		"Error Model Parameter",
-			"ModDBTable":		"Error db Table",
-			"ModDBSelectErr":	"Error GeT TYPE(ONE|ALL)",
-
-			"AdPropBind":		"Error Property Bind Env",
-			"AdPropVar":		"Empty Property Variables",
-			"AdPoTPowerErr":	"Missing PoT.Power Configure",
-
-			"PropEnvEmpty":		"Missing Env Parameters(--env="+EnvDEV+"|"+EnvSTG+"|"+EnvPRD+")",
-			"PropEnvExclude":	"Exclude Env Parameters",
-			"PropEnvFile":		"Missing Env File",
-
-			"AdapterSrc":		"Missing db Configure (Adapter.*)",
-			"AdapterMadeMode":	"Error Engine Mode",
-			"AdapterMadeDN":	"Error Engine Driver Name",
-			"AdapterMadeName":	"Error Engine db Name",
-			"AdapterEngineErr":	"Engine Connect Error",
-		},
-	}
-
-	/**
-	 * Modules: Property
-	 * - dev
-	 * - stg
-	 * - prd
-	 */
-	PropertySfxs []interface{} = []interface{}{
-		EnvDEV,
-		EnvSTG,
-		EnvPRD,
+	PoTMode []interface{} = []interface{}{
+		DebugMode,
+		ReleaseMode,
 	}
 )
 
@@ -125,17 +55,17 @@ type (
 	}
 
 	ModPoT struct {
-		Types string `json:"types"`// Todo: "ONE"->"FetchOne" "ALL"->"FetchAll"
-		Table string `json:"table"`
-		Field string `json:"field"`
-		Joins [][]interface{} `json:"joins"`
-		Limit int `json:"limit"`
-		Start []int `json:"start"`
-		Query interface{} `json:"query"`
-		QueryArgs []interface{} `json:"query_args"`
-		Columns []string `json:"columns"`
-		OrderType string `json:"order_type"`
-		OrderArgs []string `json:"order_args"`
+		Types 		string `json:"types"`// Todo: "ONE"->"FetchOne" "ALL"->"FetchAll"
+		Table 		string `json:"table"`
+		Field 		string `json:"field"`
+		Joins 		[][]interface{} `json:"joins"`
+		Limit 		int `json:"limit"`
+		Start 		[]int `json:"start"`
+		Query 		interface{} `json:"query"`
+		QueryArgs 	[]interface{} `json:"query_args"`
+		Columns 	[]string `json:"columns"`
+		OrderType 	string `json:"order_type"`
+		OrderArgs 	[]string `json:"order_args"`
 	}
 
 	/**

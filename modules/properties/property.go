@@ -19,7 +19,7 @@ type (
 	PoT struct {
 		Prop *viper.Viper
 
-		us *utils.PoT
+		vs *utils.PoT
 		fs *files.PoT
 	}
 )
@@ -28,7 +28,7 @@ func New() *PoT {
 	return &PoT {
 		Prop: viper.New(),
 
-		us: utils.New(),
+		vs: utils.New(),
 		fs: files.New(),
 	}
 }
@@ -42,7 +42,7 @@ func (cfg *PoT) Load() *PoT {
 		panic(E.Err(data.ErrPfx, "PropEnvEmpty"))
 	}
 
-	if ok := cfg.us.Contains(env, data.PropertySfxs); ok == false {
+	if ok := cfg.vs.Contains(env, data.PropertySfxs); ok == false {
 		panic(E.Err(data.ErrPfx, "PropEnvExclude"))
 	}
 
@@ -50,10 +50,16 @@ func (cfg *PoT) Load() *PoT {
 
 	ok, _ := cfg.fs.IsExists(dir)
 	if ok == false {
-		_, err := cfg.fs.Create(dir)
+		f, err := cfg.fs.Create(dir)
+		defer func() {
+			f.Close()
+		}()
+
 		if err != nil {
 			panic(E.Err(data.ErrPfx, "PropEnvFile"))
 		}
+
+		f.WriteString(cfg.tpl())
 	}
 
 	cfg.Prop.SetConfigName("." + env)
@@ -64,7 +70,6 @@ func (cfg *PoT) Load() *PoT {
 	cfg.Prop.WatchConfig()
 	cfg.Prop.OnConfigChange(func (e fsnotify.Event){
 		// Todo: do something ...
-
 	})
 
 	return cfg
@@ -82,6 +87,108 @@ func (cfg *PoT) UsK(k string, v interface{}, opts ...viper.DecoderConfigOption) 
 	return cfg.Prop.UnmarshalKey(k, v, opts ...)
 }
 
-func (cfg *PoT) TpL() string {
-	return ""
+func (cfg *PoT) tpl() string {
+	return cfg.vs.Sprintf(`## %v ##
+PoT:
+  Name: "%v"
+  Port: "%v"
+  Mode: %d
+  TimeLocation: "%v"
+  Addr: ""
+  Hssl:
+    Power: %d
+    CertFile: ""
+    KeysFile: ""
+
+Power:
+  Adapter: %d
+  Redis: %d
+
+Adapter:
+  Mysql:
+    Param:
+      MaxOpen: 2000
+      MaxIdle: 1000
+      ShowedSQL: false
+      CachedSQL: false
+
+    Conns:
+      db_demo:
+        Master:
+          - Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+          - Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+
+        Slaver:
+          - Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+
+Redis:
+  I:
+    Network: "tcp"
+    Addr: "127.0.0.1:6397"
+    Password: ""
+    DB: 0
+  II:
+    Network: "tcp"
+    Addr: "127.0.0.1:6397"
+    Password: ""
+    DB: 1
+
+RedisCluster:
+  Network: "tcp"
+  Password: ""
+  DB: 0
+  AddrCluster:
+    - "127.0.0.1:6397"
+    - "127.0.0.1:6397"
+    - "127.0.0.1:6397"
+
+Logs:
+  PoT:
+    FileName: "%v"
+    ZapCoreLevel: "info"
+    Format: "%v"
+    Time: "%v"
+    Level: "%v"
+    Name: "%v"
+    Caller: "%v"
+    Message: "%v"
+    StackTrace: "%v"
+    MaxSize: %d
+    MaxBackUps: %d
+    MaxAge: %d
+
+PoTSelfDefined:
+  Test: "Configure Self Defined Success"
+`,
+data.PoT,
+data.PoT,
+// - PoT
+data.PropertyPort,
+data.PropertyMode,
+data.PropertyTimeLocation,
+data.PropertyHsslPower,
+data.PropertyAdapter,
+data.PropertyRedis,
+// - Log
+data.LogFileName,
+data.LogFormatConsole,
+data.LogTime,
+data.LogLevel,
+data.LogName,
+data.LogCaller,
+data.LogMessage,
+data.LogStackTrace,
+data.LogMaxSize,
+data.LogMaxBackups,
+data.LogMaxAge,
+	)
 }
