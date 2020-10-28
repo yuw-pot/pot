@@ -9,6 +9,7 @@ import (
 	"github.com/yuw-pot/pot/data"
 	A "github.com/yuw-pot/pot/modules/adapter"
 	R "github.com/yuw-pot/pot/modules/cache/redis"
+	C "github.com/yuw-pot/pot/modules/crypto"
 	E "github.com/yuw-pot/pot/modules/err"
 	P "github.com/yuw-pot/pot/modules/properties"
 	U "github.com/yuw-pot/pot/modules/utils"
@@ -34,6 +35,14 @@ func init() {
 	_ = P.PropertyPoT.UsK("Power", &adPowerPoT)
 	if adPowerPoT == nil {
 		panic(E.Err(data.ErrPfx, "PoTPowerErr"))
+	}
+
+	//   - add JwT Key
+	if adPowerPoT.JwT == 1 {
+		_ = P.PropertyPoT.UsK("JwT", &C.JPoT)
+		if C.JPoT == nil {
+			panic(E.Err(data.ErrPfx, "PoTJwTErr"))
+		}
 	}
 
 	// Initialized Adapter

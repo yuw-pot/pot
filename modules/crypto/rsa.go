@@ -13,20 +13,25 @@ import (
 )
 
 type (
-	rsaPoT struct {
+	RsAPoT struct {
 
 	}
 )
 
-func newRsA() *rsaPoT {
-	return &rsaPoT {
+func newRsA() *RsAPoT {
+	return &RsAPoT {
 
 	}
 }
 
-func (rsa *rsaPoT) made(d ... interface{}) (interface{}, error) {
-	return nil, nil
+func (rsa *RsAPoT) made(d ... interface{}) (interface{}, error) {
+	return rsa, nil
 }
+
+func (rsa *RsAPoT) T() string {
+	return "success T RsA!"
+}
+
 
 /**
  * Todo: Make PublicKey & PrivateKey

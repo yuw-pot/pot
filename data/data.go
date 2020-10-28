@@ -7,15 +7,12 @@ package data
 const (
 	PoT	string = "PoT"
 
-	// Mode
-	DebugMode	string = "debug"
+	// PoT Mode
 	ReleaseMode	string = "release"
+	ConsoleMode string = "console"
 
 	// Time Location
 	TimeLocation	string = "Asia/Shanghai"
-
-	// Route Separated
-	RSeP 		string = "->"
 
 	// Models
 	ModONE		string = "ONE"
@@ -26,7 +23,7 @@ const (
 
 var (
 	PoTMode []interface{} = []interface{}{
-		DebugMode,
+		ConsoleMode,
 		ReleaseMode,
 	}
 )
@@ -44,6 +41,7 @@ type (
 
 	// Power
 	PowerPoT struct {
+		JwT 			int `yaml:"jwt" json:"jwt"`
 		Adapter 		int	`yaml:"adapter" json:"adapter"`
 		Redis 			int `yaml:"redis" json:"redis"`
 	}

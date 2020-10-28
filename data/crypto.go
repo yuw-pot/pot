@@ -6,6 +6,10 @@ package data
 
 const (
 	// Crypto
+	JwTKeY		string = "PoT*!^YwY#"
+	JwTExpire	int = 1
+	JwTMode		string = "H"
+
 	MD5			string = "MD5"
 	SHA1		string = "SHA1"
 	SHA256		string = "SHA256"

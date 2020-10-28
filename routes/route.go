@@ -10,43 +10,49 @@ import (
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/exceptions"
 	"net/http"
-	"strings"
 )
 
 var (
 	RPoT *PoT = new(PoT)
-	RMaP *data.H = &data.H{}
+	rMaP *data.H = &data.H{}
 )
 
 type (
 	Routes interface {
 		Tag() string
-		Put(r *gin.Engine, toFunc map[string][]gin.HandlerFunc)
+		PuT(r *PoT, toFunc map[*KeY][]interface{})
 	}
 
 	RouteSrc []Routes
-	RouteTpl []interface{}
-	RouteArr map[string]map[string][]gin.HandlerFunc
+	RouteArr map[string]map[*KeY][]interface{}
 
 	PoT struct {
+		Eng *gin.Engine
 		Src *RouteSrc
-		Tpl *RouteTpl
 		Arr *RouteArr
+	}
+
+	KeY struct {
+		Service 	string
+		Controller 	string
+		Action 		string
+		Mode 		string
+		Path 		string
 	}
 )
 
-func (route *PoT) Made(r *gin.Engine) {
+func (route *PoT) Made() *PoT {
 	var exp *exceptions.PoT = exceptions.New()
 
 	/**
 	 * Todo: No Routes To Redirect
 	 */
-	r.NoRoute(exp.NoRoute)
+	route.Eng.NoRoute(exp.NoRoute)
 
 	/**
 	 * Todo: No Method To Redirect
 	 */
-	r.NoMethod(exp.NoMethod)
+	route.Eng.NoMethod(exp.NoMethod)
 
 	for _, to := range *route.Src {
 		if _, ok := (*route.Arr)[to.Tag()]; ok == false {
@@ -57,45 +63,71 @@ func (route *PoT) Made(r *gin.Engine) {
 			continue
 		}
 
-		to.Put(r, (*route.Arr)[to.Tag()])
+		to.PuT(route, (*route.Arr)[to.Tag()])
 	}
+
+	return route
 }
 
-func To(ctx *gin.RouterGroup, toFunc map[string][]gin.HandlerFunc) {
-	for r, ctrl := range toFunc {
-		x := strings.Split(r, data.RSeP)
+func Tx(relativePath interface{}, toFunc map[*KeY][]interface{}) {
 
-		if len(x) != 3 {
-			continue
+}
+
+func To(ctx *gin.RouterGroup, toFunc map[*KeY][]interface{}) {
+	for x, ctrlHandlerFunc := range toFunc {
+		(*rMaP)[x.Service + x.Controller + x.Action] = x.Path
+
+		ctrl := make([]gin.HandlerFunc, len(ctrlHandlerFunc))
+		for k, val := range ctrlHandlerFunc {
+			ctrl[k] = val.(gin.HandlerFunc)
 		}
 
-		(*RMaP)[x[0]] = x[2]
-
-		switch strings.ToLower(x[1]) {
-		case "get":
-			ctx.GET (x[2], ctrl ...)
+		switch x.Mode {
+		case PoTMethodAnY:
+			ctx.Any (x.Path, ctrl ...)
 			continue
 
-		case "any":
-			ctx.Any (x[2], ctrl ...)
+		case PoTMethodGeT:
+			ctx.GET (x.Path, ctrl ...)
 			continue
 
-		case "post":
-			ctx.POST(x[2], ctrl ...)
+		case PoTMethodPosT:
+			ctx.POST(x.Path, ctrl ...)
 			continue
 
-		case "delete":
-			ctx.DELETE(x[2], ctrl ...)
+		case PoTMethodDelete:
+			ctx.DELETE(x.Path, ctrl ...)
 			continue
 
-		case "put":
-			ctx.PUT(x[2], ctrl ...)
+		case PoTMethodPuT:
+			ctx.PUT(x.Path, ctrl ...)
+			continue
+
+		case PoTMethodHeaD:
+			ctx.HEAD(x.Path, ctrl ...)
+			continue
+
+		case PoTMethodPatch:
+			ctx.PATCH(x.Path, ctrl ...)
+			continue
+
+		case PoTMethodOptions:
+			ctx.OPTIONS(x.Path, ctrl ...)
 			continue
 
 		default:
 			continue
 		}
 	}
+}
+
+func GeTPath(service string, controller string, action string) interface{} {
+	_, ok := (*rMaP)[service + controller + action]
+	if ok == false {
+		return nil
+	}
+
+	return (*rMaP)[service + controller + action]
 }
 
 func Cors() gin.HandlerFunc {

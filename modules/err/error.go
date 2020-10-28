@@ -7,7 +7,6 @@ package err
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	"runtime"
 )
@@ -21,24 +20,11 @@ type (
 )
 
 func (err *PoT) ErrPoTCombine() {
-	if err.ErrMsg != nil {
-		for k, v := range *err.ErrMsg {
-			if k != data.ErrPfx {
-				(*data.ErrMsg)[k] = v
-			}
-		}
-	}
+	data.SeTErrMsg(err.ErrMsg)
 }
 
-func Err(pfx string, key string, content ...string) error {
-	str := cast.ToString((*data.ErrMsg)["PoT"]["ErrDefault"])
-
-	s, ok := (*data.ErrMsg)[pfx][key]
-	if ok {
-		str = cast.ToString(s)
-	}
-
-	return errors.New(str)
+func Err(pfx string, key string, content ...interface{}) error {
+	return errors.New(data.GeTErrMsg(pfx, key, content ...))
 }
 
 func Position() interface{} {

@@ -101,8 +101,14 @@ PoT:
     KeysFile: ""
 
 Power:
+  JwT: %d
   Adapter: %d
   Redis: %d
+
+JwT:
+  Key: %v ## Edit for Security ##
+  Expire: %d
+  Mode: %v
 
 Adapter:
   Mysql:
@@ -176,8 +182,14 @@ data.PropertyPort,
 data.PropertyMode,
 data.PropertyTimeLocation,
 data.PropertyHsslPower,
+// - PoT Power
+data.PropertyJwT,
 data.PropertyAdapter,
 data.PropertyRedis,
+// - JwT Key
+data.JwTKeY,
+data.JwTExpire,
+data.JwTMode,
 // - Log
 data.LogFileName,
 data.LogFormatConsole,

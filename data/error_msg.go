@@ -4,16 +4,27 @@
 
 package data
 
+import (
+	"fmt"
+	"github.com/spf13/cast"
+	"net/http"
+)
+
 const (
 	// Err Message Keywords
 	ErrPfx 		string = PoT
+
+	// Success
+	PoTStatusOK			int = http.StatusOK
+
+	// Err Status
+	PoTUnKnown			int = -1
+	PoTStatusNotFound	int = http.StatusNotFound
 )
 
 var (
-	/**
-	 * Modules: Errors
-	 */
-	ErrMsg *ErrH = &ErrH{
+	// Modules: Errors
+	eMsg *ErrH = &ErrH {
 		ErrPfx: {
 			"ErrDefault":		"Unknown Error",
 
@@ -21,6 +32,7 @@ var (
 			"PoTZapLogErr":		"Error Logs.PoT Parameters",
 			"PoTSslCF":			"Missing SSL Cert File",
 			"PoTSslKF":			"Missing SSL Key File",
+			"PoTJwTErr":		"Missing JwT Parameters",
 
 			"ModParamsErr":		"Error Model Parameter",
 			"ModDBTable":		"Error db Table",
@@ -49,6 +61,32 @@ var (
 
 			"TokenParamsErr":	"Missing Token Parameters",
 			"TokenTypeErr":		"Error Token Type(MD5|SHA1|SHA256)",
+
+			"TokenExpired": 	"Token is expired",
+			"TokenNotValidYet": "Token hasn't active yet",
+			"TokenMalformed": 	"That's not even a token",
+			"TokenInvalid": 	"Token Invalid",
 		},
 	}
 )
+
+func SeTErrMsg(msg *ErrH) {
+	if msg != nil {
+		for k, v := range *msg {
+			if k != ErrPfx {
+				(*eMsg)[k] = v
+			}
+		}
+	}
+}
+
+func GeTErrMsg(pfx, k string, content ...interface{}) string {
+	str := cast.ToString((*eMsg)[ErrPfx]["ErrDefault"])
+
+	s, ok := (*eMsg)[pfx][k]
+	if ok {
+		str = cast.ToString(s) + ", " + fmt.Sprint(content ...)
+	}
+
+	return str
+}

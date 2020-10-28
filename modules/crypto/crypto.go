@@ -18,8 +18,8 @@ type (
 )
 
 var (
-	_ crypto = &rsaPoT{}
-	_ crypto = &tokenPoT{}
+	_ crypto = &RsAPoT{}
+	_ crypto = &SimplyPoT{}
 )
 
 func New() *PoT {

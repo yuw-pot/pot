@@ -102,6 +102,10 @@ func (v *PoT) NumRandom(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
+func (v *PoT) StructXToY(x interface{}, y interface{}) {
+
+}
+
 func (v *PoT) Fprintf(writer io.Writer, format string, d ... interface{}) {
 	fmt.Fprintf(writer, format, d ...)
 }

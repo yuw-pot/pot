@@ -37,7 +37,7 @@ func New() *PoT {
 }
 
 func (engine *PoT) Run() {
-	engine.vPoT.Fprintf(gin.DefaultWriter, "[%v], %v\n", data.PoT, version)
+	engine.vPoT.Fprintf(gin.DefaultWriter, "[%v] %v\n", data.PoT, version)
 
 	// Disable Console Color
 	gin.DisableConsoleColor()
@@ -54,7 +54,8 @@ func (engine *PoT) Run() {
 
 	engine.setMode(r, data.PoTMode[cast.ToInt(PoTMode)])
 
-	R.RPoT.Made(r)
+	R.RPoT.Eng = r
+	r = R.RPoT.Made().Eng
 
 	// Https Power ON/OFF
 	//   - PoT.Hssl
@@ -103,8 +104,8 @@ func (engine *PoT) PoT() *PoT {
 }
 
 func (engine *PoT) setMode(r *gin.Engine, mode interface{}) {
-	switch cast.ToString(mode) {
-	case data.DebugMode:
+	switch mode {
+	case data.ConsoleMode:
 		// Mode: Debug
 		r.Use(gin.Recovery())
 		r.Use(R.LoggerWithFormat())

@@ -15,18 +15,18 @@ import (
 )
 
 type (
-	tokenPoT struct {
+	SimplyPoT struct {
 
 	}
 )
 
-func newToken() *tokenPoT {
-	return &tokenPoT {
+func newToken() *SimplyPoT {
+	return &SimplyPoT {
 
 	}
 }
 
-func (token *tokenPoT) made(d ... interface{}) (interface{}, error) {
+func (simply *SimplyPoT) made(d ... interface{}) (interface{}, error) {
 	if len(d) <= 1 {
 		return nil, E.Err(data.ErrPfx, "TokenParamsErr")
 	}
@@ -37,34 +37,34 @@ func (token *tokenPoT) made(d ... interface{}) (interface{}, error) {
 
 	switch d[0] {
 	case data.MD5:
-		return token.md5(d ...)
+		return simply.md5(d ...)
 
 	case data.SHA1:
-		return token.sha1(d ...)
+		return simply.sha1(d ...)
 
 	case data.SHA256:
-		return token.sha256(d ...)
+		return simply.sha256(d ...)
 
 	default:
 		return nil, E.Err(data.ErrPfx, "TokenTypeErr")
 	}
 }
 
-func (token *tokenPoT) md5(d ... interface{}) (interface{}, error) {
+func (simply *SimplyPoT) md5(d ... interface{}) (interface{}, error) {
 	res := md5.New()
 	res.Write([]byte(cast.ToString(d[1])))
 
 	return hex.EncodeToString(res.Sum([]byte(""))), nil
 }
 
-func (token *tokenPoT) sha1(d ... interface{}) (interface{}, error)  {
+func (simply *SimplyPoT) sha1(d ... interface{}) (interface{}, error)  {
 	res := sha1.New()
 	res.Write([]byte(cast.ToString(d[1])))
 
 	return hex.EncodeToString(res.Sum([]byte(""))), nil
 }
 
-func (token *tokenPoT) sha256(d ... interface{}) (interface{}, error) {
+func (simply *SimplyPoT) sha256(d ... interface{}) (interface{}, error) {
 	res := sha256.New()
 	res.Write([]byte(cast.ToString(d[1])))
 

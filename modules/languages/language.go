@@ -4,11 +4,25 @@
 
 package languages
 
-import "golang.org/x/text/language"
+import (
+	U "github.com/yuw-pot/pot/modules/utils"
+	"golang.org/x/text/language"
+)
 
 var (
 	EN = language.English.String()
 	CN = language.English.String()
 )
 
+type (
+	PoT struct {
+		vs *U.PoT
+	}
+)
+
+func New() *PoT {
+	return &PoT {
+		vs: U.New(),
+	}
+}
 

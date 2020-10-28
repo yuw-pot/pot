@@ -16,6 +16,7 @@ const (
 	PropertyTimeLocation 	string = "Asia/Shanghai"
 	PropertyHsslPower		int = 0
 
+	PropertyJwT				int = 1
 	PropertyAdapter			int = 1
 	PropertyRedis			int = 1
 )
