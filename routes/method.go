@@ -16,3 +16,12 @@ const (
 	PoTMethodOptions = "OPTIONS"
 	PoTMethodTrace   = "TRACE"
 )
+
+func GeTPath(service string, controller string, action string) interface{} {
+	_, ok := (*rMaP)[service + controller + action]
+	if ok == false {
+		return nil
+	}
+
+	return (*rMaP)[service + controller + action]
+}

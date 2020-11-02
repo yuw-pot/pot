@@ -5,11 +5,9 @@
 package routes
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/exceptions"
-	"net/http"
 )
 
 var (
@@ -115,48 +113,4 @@ func To(ctx *gin.RouterGroup, toFunc map[*KeY][]interface{}) {
 			continue
 		}
 	}
-}
-
-func GeTPath(service string, controller string, action string) interface{} {
-	_, ok := (*rMaP)[service + controller + action]
-	if ok == false {
-		return nil
-	}
-
-	return (*rMaP)[service + controller + action]
-}
-
-func Cors() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		method := ctx.Request.Method
-		origin := ctx.Request.Header.Get("Origin")
-
-		if origin != "" {
-			ctx.Header("Access-Control-Allow-Origin", "*")
-			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-			ctx.Header("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization")
-			ctx.Header("Access-Control-Allow-Credentials", "true")
-			ctx.Set("content-type", "application/json")
-		}
-
-		if method == "OPTIONS" {
-			ctx.AbortWithStatus(http.StatusNoContent)
-		}
-
-		ctx.Next()
-	}
-}
-
-func LoggerWithFormat() gin.HandlerFunc {
-	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("[PoT] %v |	%v |	%v |	%v |	%v |	%v(%v)\n",
-			param.TimeStamp.Format("2006/01/02 - 15:04:05"),
-			param.StatusCode,
-			param.Latency,
-			param.ClientIP,
-			param.Method,
-			param.Path,
-			param.Request.Proto,
-		)
-	})
 }
