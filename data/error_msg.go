@@ -7,19 +7,11 @@ package data
 import (
 	"fmt"
 	"github.com/spf13/cast"
-	"net/http"
 )
 
 const (
 	// Err Message Keywords
-	ErrPfx 		string = PoT
-
-	// Success
-	PoTStatusOK			int = http.StatusOK
-
-	// Err Status
-	PoTUnKnown			int = -1
-	PoTStatusNotFound	int = http.StatusNotFound
+	ErrPfx string = PoT
 )
 
 var (

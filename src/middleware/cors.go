@@ -5,12 +5,12 @@
 package middleware
 
 import (
+	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/libs"
-	"net/http"
 )
 
-func (middleware *m) Cors() *libs.PoT {
-	return middleware.lib.SeT(func(p *libs.PoT) {
+func (m *M) Cors() *libs.PoT {
+	return m.lib.SeT(func(p *libs.PoT) {
 		ctx := p.Lib()
 
 		method := ctx.Request.Method
@@ -25,7 +25,7 @@ func (middleware *m) Cors() *libs.PoT {
 		}
 
 		if method == "OPTIONS" {
-			ctx.AbortWithStatus(http.StatusNoContent)
+			ctx.AbortWithStatus(data.PoTStatusNoContent)
 		}
 
 		ctx.Next()

@@ -11,8 +11,8 @@ import (
 	E "github.com/yuw-pot/pot/modules/err"
 )
 
-func (middleware *m) JwTAuth() *libs.PoT {
-	return middleware.lib.SeT(func(p *libs.PoT) {
+func (m *M) JwTAuth() *libs.PoT {
+	return m.lib.SeT(func(p *libs.PoT) {
 		ctx := p.Lib()
 
 		token := ctx.Request.Header.Get("token")

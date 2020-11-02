@@ -9,13 +9,13 @@ import (
 	"github.com/yuw-pot/pot/modules/utils"
 )
 
-type m struct {
+type M struct {
 	lib *libs.PoT
 	v *utils.PoT
 }
 
-func New() *m {
-	return &m {
+func New() *M {
+	return &M {
 		lib: new(libs.PoT),
 		v: utils.New(),
 	}
