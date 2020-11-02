@@ -12,12 +12,15 @@ import (
 const (
 	// Err Message Keywords
 	ErrPfx string = PoT
+
+	PoTSuccessOK 	= "SuccessOK"
 )
 
 var (
 	// Modules: Errors
 	eMsg *ErrH = &ErrH {
 		ErrPfx: {
+			PoTSuccessOK:		"Success",
 			"ErrDefault":		"Unknown Error",
 
 			"PoTModeErr":		"Error PoT.Mode Parameters (0->debug|1->release) in the file of .("+EnvDEV+"|"+EnvSTG+"|"+EnvPRD+").yaml",
@@ -80,7 +83,10 @@ func GeTErrMsg(pfx, k string, content ...interface{}) string {
 
 	s, ok := (*eMsg)[pfx][k]
 	if ok {
-		str = cast.ToString(s) + ", " + fmt.Sprint(content ...)
+		str = cast.ToString(s)
+		if len(content) != 0 {
+			str = str + ", " + fmt.Sprint(content ...)
+		}
 	}
 
 	return str

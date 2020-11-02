@@ -119,7 +119,7 @@ Adapter:
       CachedSQL: false
 
     Conns:
-      db_demo:
+      db_repo_demo:
         Master:
           - Host: "127.0.0.1"
             Port: 3306

@@ -5,14 +5,12 @@
 package middleware
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/yuw-pot/pot/data"
-	"github.com/yuw-pot/pot/libs"
 )
 
-func (m *M) Cors() *libs.PoT {
-	return m.lib.SeT(func(p *libs.PoT) {
-		ctx := p.Lib()
-
+func (m *M) Cors() gin.HandlerFunc{
+	return func(ctx *gin.Context) {
 		method := ctx.Request.Method
 		origin := ctx.Request.Header.Get("Origin")
 
@@ -29,5 +27,5 @@ func (m *M) Cors() *libs.PoT {
 		}
 
 		ctx.Next()
-	})
+	}
 }

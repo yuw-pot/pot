@@ -18,11 +18,11 @@ var (
 type (
 	Routes interface {
 		Tag() string
-		PuT(r *PoT, toFunc map[*KeY][]interface{})
+		PuT(r *PoT, toFunc map[*KeY][]gin.HandlerFunc)
 	}
 
 	RouteSrc []Routes
-	RouteArr map[string]map[*KeY][]interface{}
+	RouteArr map[string]map[*KeY][]gin.HandlerFunc
 
 	PoT struct {
 		Eng *gin.Engine
@@ -67,14 +67,9 @@ func (route *PoT) Made() *PoT {
 	return route
 }
 
-func To(ctx *gin.RouterGroup, toFunc map[*KeY][]interface{}) {
-	for x, ctrlHandlerFunc := range toFunc {
+func To(ctx *gin.RouterGroup, toFunc map[*KeY][]gin.HandlerFunc) {
+	for x, ctrl := range toFunc {
 		(*rMaP)[x.Service + x.Controller + x.Action] = x.Path
-
-		ctrl := make([]gin.HandlerFunc, len(ctrlHandlerFunc))
-		for k, val := range ctrlHandlerFunc {
-			ctrl[k] = val.(gin.HandlerFunc)
-		}
 
 		switch x.Mode {
 		case PoTMethodAnY:

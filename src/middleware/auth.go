@@ -5,16 +5,14 @@
 package middleware
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/yuw-pot/pot/data"
-	"github.com/yuw-pot/pot/libs"
 	"github.com/yuw-pot/pot/modules/crypto"
 	E "github.com/yuw-pot/pot/modules/err"
 )
 
-func (m *M) JwTAuth() *libs.PoT {
-	return m.lib.SeT(func(p *libs.PoT) {
-		ctx := p.Lib()
-
+func (m *M) JwTAuth() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
 		if token == "" {
 			ctx.JSON(data.PoTStatusOK, &data.SrvPoT{
@@ -52,5 +50,5 @@ func (m *M) JwTAuth() *libs.PoT {
 		ctx.Set("JwT", JwTRefresh)
 		ctx.Set("JwTInfo", JwT)
 		ctx.Next()
-	})
+	}
 }

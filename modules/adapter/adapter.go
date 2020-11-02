@@ -195,15 +195,11 @@ func (adapterPoT *PoT) Made() {
 		for db, conns := range adapterConns.(map[string]interface{}) {
 			dbTag := strings.Split(db, "_")
 
-			if len(dbTag) != 2 {
+			if len(dbTag) <= 1 || dbTag[1] == "" {
 				continue
 			}
 
-			if dbTag[1] == "" {
-				continue
-			}
-
-			adapterPoT.name = dbTag[1]
+			adapterPoT.name = strings.Join(dbTag[1:], "_")
 
 			master, okMaster := conns.(map[string]interface{})["master"]
 			if okMaster == false || master == nil {
