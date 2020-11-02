@@ -38,6 +38,9 @@ var (
 			"ModDBTable":		"Error db Table",
 			"ModDBSelectErr":	"Error GeT TYPE(ONE|ALL)",
 
+			"MWareNoPriority":	"No Priority",
+			"MWareUnknown":		"UnKnown",
+
 			"RedParamsErr":		"Missing Redis Configure",
 			"RedEngineErr":		"Missing Redis Engine",
 

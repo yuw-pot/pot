@@ -69,10 +69,6 @@ func (route *PoT) Made() *PoT {
 	return route
 }
 
-func Tx(relativePath interface{}, toFunc map[*KeY][]interface{}) {
-
-}
-
 func To(ctx *gin.RouterGroup, toFunc map[*KeY][]interface{}) {
 	for x, ctrlHandlerFunc := range toFunc {
 		(*rMaP)[x.Service + x.Controller + x.Action] = x.Path
