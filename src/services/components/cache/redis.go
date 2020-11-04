@@ -9,15 +9,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
-	R "github.com/yuw-pot/pot/modules/cache/redis"
+	cache "github.com/yuw-pot/pot/modules/cache/redis"
 	E "github.com/yuw-pot/pot/modules/err"
-	U "github.com/yuw-pot/pot/modules/utils"
+	"github.com/yuw-pot/pot/modules/utils"
 	"time"
 )
 
 type (
 	RedisComponent struct {
-		vPoT *U.PoT
+		v *utils.PoT
 		client *redis.Client
 		ctx context.Context
 	}
@@ -25,21 +25,25 @@ type (
 
 func NewRedis(d string) *RedisComponent {
 	r := &RedisComponent {
-		vPoT: U.New(),
+		v: utils.New(),
 		ctx: context.Background(),
 	}
 
-	r.client, _ = R.Made(d)
+	r.client, _ = cache.Made(d)
 	return r
 }
 
-func (r *RedisComponent) SeT(k interface{}, v interface{}, d ... time.Duration) error {
+func (r *RedisComponent) Cache() *RedisComponent {
+	return r
+}
+
+func (r *RedisComponent) SeT(key, val interface{}, d ... time.Duration) (interface{}, error) {
 	if err := r.check(); err != nil {
-		return err
+		return nil, err
 	}
 
-	if k == nil || v == nil {
-		return E.Err(data.ErrPfx, "CpCacheSeTParams")
+	if key == nil || val == nil {
+		return nil, E.Err(data.ErrPfx, "ComponentCacheSeTParams")
 	}
 
 	var expiration time.Duration = 0
@@ -47,12 +51,7 @@ func (r *RedisComponent) SeT(k interface{}, v interface{}, d ... time.Duration) 
 		expiration = d[0]
 	}
 
-	res := r.client.Set(r.ctx, cast.ToString(k), v, expiration)
-	if res.Err() != nil {
-		return res.Err()
-	}
-
-	return nil
+	return r.client.Set(r.ctx, cast.ToString(key), val, expiration).Result()
 }
 
 func (r *RedisComponent) GeT(d interface{}) (interface{}, error) {
@@ -60,12 +59,15 @@ func (r *RedisComponent) GeT(d interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	res, err := r.client.Get(r.ctx, cast.ToString(d)).Result()
-	if err != nil {
+	return r.client.Get(r.ctx, cast.ToString(d)).Result()
+}
+
+func (r *RedisComponent) DeL(d interface{}) (interface{}, error) {
+	if err := r.check(); err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return r.client.Del(r.ctx, cast.ToString(d)).Result()
 }
 
 func (r *RedisComponent) IsExisT(d ... string) {
@@ -74,7 +76,7 @@ func (r *RedisComponent) IsExisT(d ... string) {
 
 func (r *RedisComponent) check() error {
 	if r.client == nil {
-		return E.Err(data.ErrPfx, "CpCacheClient")
+		return E.Err(data.ErrPfx, "ComponentCacheClient")
 	}
 
 	return nil

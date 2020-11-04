@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
-	P "github.com/yuw-pot/pot/modules/properties"
+	"github.com/yuw-pot/pot/modules/properties"
 	"strings"
 	"sync"
 )
@@ -52,13 +52,13 @@ func New() *rPoT {
 }
 
 func (r *rPoT) Made() {
-	redisPoT := P.PropertyPoT.GeT("Redis", nil)
+	redisPoT := properties.PropertyPoT.GeT("Redis", nil)
 	if redisPoT == nil {
 		panic(E.Err(data.ErrPfx, "RedParamsErr"))
 	}
 
 	adapterRedis = map[string]*redis.Client{}
-	for k, v := range redisPoT.(map[string]interface{}) {
+	for key, val := range redisPoT.(map[string]interface{}) {
 		r.sParams = &srcParams {
 			network:  "",
 			addr:     "",
@@ -66,23 +66,23 @@ func (r *rPoT) Made() {
 			db:       0,
 		}
 
-		if _, ok := v.(map[string]interface{})["Network"]; ok {
-			r.sParams.network = cast.ToString(v.(map[string]interface{})["Network"])
+		if _, ok := val.(map[string]interface{})["Network"]; ok {
+			r.sParams.network = cast.ToString(val.(map[string]interface{})["Network"])
 		}
 
-		if _, ok := v.(map[string]interface{})["Addr"]; ok {
-			r.sParams.addr = cast.ToString(v.(map[string]interface{})["Addr"])
+		if _, ok := val.(map[string]interface{})["Addr"]; ok {
+			r.sParams.addr = cast.ToString(val.(map[string]interface{})["Addr"])
 		}
 
-		if _, ok := v.(map[string]interface{})["Password"]; ok {
-			r.sParams.password = cast.ToString(v.(map[string]interface{})["Password"])
+		if _, ok := val.(map[string]interface{})["Password"]; ok {
+			r.sParams.password = cast.ToString(val.(map[string]interface{})["Password"])
 		}
 
-		if _, ok := v.(map[string]interface{})["DB"]; ok {
-			r.sParams.db = cast.ToInt(v.(map[string]interface{})["DB"])
+		if _, ok := val.(map[string]interface{})["DB"]; ok {
+			r.sParams.db = cast.ToInt(val.(map[string]interface{})["DB"])
 		}
 
-		adapterRedis[strings.ToLower(k)] = r.instance()
+		adapterRedis[strings.ToLower(key)] = r.instance()
 	}
 }
 

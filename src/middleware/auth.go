@@ -7,45 +7,42 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yuw-pot/pot/data"
-	"github.com/yuw-pot/pot/modules/crypto"
+	"github.com/yuw-pot/pot/modules/auth"
 	E "github.com/yuw-pot/pot/modules/err"
 )
 
 func (m *M) JwTAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		TpL := data.TpLInitialized()
+		TpL.Status = data.PoTUnKnown
+
 		token := ctx.Request.Header.Get("token")
 		if token == "" {
-			ctx.JSON(data.PoTStatusOK, &data.SrvPoT{
-				Status:   data.PoTUnKnown,
-				Msg:      E.Err(data.ErrPfx, "MWareNoPriority").Error(),
-				Response: nil,
-			})
+			TpL.Msg = E.Err(data.ErrPfx, "MWareNoPriority").Error()
+
+			ctx.JSON(data.PoTStatusOK, TpL)
 			ctx.Abort()
 			return
 		}
 
-		JwT, err := crypto.JPoT.Parse(token)
+		JwT, err := auth.JPoT.Parse(token)
 		if err != nil {
 			if err == E.Err(data.ErrPfx, "TokenExpired") {
-				ctx.JSON(data.PoTStatusOK, &data.SrvPoT{
-					Status:   data.PoTUnKnown,
-					Msg:      E.Err(data.ErrPfx, "MWareUnknown").Error(),
-					Response: nil,
-				})
+				TpL.Msg = E.Err(data.ErrPfx, "MWareUnknown").Error()
+
+				ctx.JSON(data.PoTStatusOK, TpL)
 				ctx.Abort()
 				return
 			} else {
-				ctx.JSON(data.PoTStatusOK, &data.SrvPoT{
-					Status:   data.PoTUnKnown,
-					Msg:      err.Error(),
-					Response: nil,
-				})
+				TpL.Msg = err.Error()
+
+				ctx.JSON(data.PoTStatusOK, TpL)
 				ctx.Abort()
 				return
 			}
 		}
 
-		JwTRefresh, _ := crypto.JPoT.Refresh(token)
+		JwTRefresh, _ := auth.JPoT.Refresh(token)
 
 		ctx.Set("JwT", JwTRefresh)
 		ctx.Set("JwTInfo", JwT)

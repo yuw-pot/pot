@@ -10,10 +10,8 @@ import (
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
-
-	//E "github.com/yuw-pot/pot/modules/err"
-	P "github.com/yuw-pot/pot/modules/properties"
-	U "github.com/yuw-pot/pot/modules/utils"
+	"github.com/yuw-pot/pot/modules/properties"
+	"github.com/yuw-pot/pot/modules/utils"
 	"strings"
 	"time"
 )
@@ -28,7 +26,7 @@ const (
 
 type (
 	PoT struct {
-		vPoT *U.PoT
+		v *utils.PoT
 		dn interface{}
 		name string
 		sConns *srcConns
@@ -75,7 +73,7 @@ var (
 )
 
 func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, error) {
-	v := U.New()
+	v := utils.New()
 	if ok := v.Contains(driverName, dNames); ok == false {
 		return nil, E.Err(data.ErrPfx, "AdapterMadeDN")
 	}
@@ -153,15 +151,15 @@ func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, e
 
 func New() *PoT {
 	return &PoT {
-		vPoT: U.New(),
+		v: utils.New(),
 	}
 }
 
 func (adapterPoT *PoT) Made() {
 	// Set db Time Location
 	//   - GeT Configure
-	adapterTimeLocation := P.PropertyPoT.GeT("PoT.TimeLocation", data.TimeLocation)
-	d, err := adapterPoT.vPoT.SetTimeLocation(cast.ToString(adapterTimeLocation))
+	adapterTimeLocation := properties.PropertyPoT.GeT("PoT.TimeLocation", data.TimeLocation)
+	d, err := adapterPoT.v.SetTimeLocation(cast.ToString(adapterTimeLocation))
 	if err != nil {
 		panic(err)
 	}
@@ -171,7 +169,7 @@ func (adapterPoT *PoT) Made() {
 	//   - SeT Adapter data
 	for _, dn := range dNames {
 		var sParam *srcParam
-		_ = P.PropertyPoT.UsK(
+		_ = properties.PropertyPoT.UsK(
 			fmt.Sprintf("Adapter.%v.Param", cast.ToString(dn)),
 			&sParam,
 		)
@@ -183,7 +181,7 @@ func (adapterPoT *PoT) Made() {
 		adapterPoT.dn = dn
 		adapterPoT.sParam = sParam
 
-		adapterConns := P.PropertyPoT.GeT(
+		adapterConns := properties.PropertyPoT.GeT(
 			fmt.Sprintf("Adapter.%v.Conns", cast.ToString(dn)),
 			nil,
 		)
@@ -223,7 +221,7 @@ func (adapterPoT *PoT) Made() {
 func (adapterPoT *PoT) check(d ... interface{}) []*xorm.Engine {
 	var adapters []*xorm.Engine = make([]*xorm.Engine, len(d))
 
-	for k, v := range d {
+	for key, val := range d {
 		adapterPoT.sConns = &srcConns {
 			Host:     "",
 			Port:     0,
@@ -231,23 +229,23 @@ func (adapterPoT *PoT) check(d ... interface{}) []*xorm.Engine {
 			Password: "",
 		}
 
-		if _, ok := v.(map[interface{}]interface{})["Host"]; ok {
-			adapterPoT.sConns.Host = cast.ToString(v.(map[interface{}]interface{})["Host"])
+		if _, ok := val.(map[interface{}]interface{})["Host"]; ok {
+			adapterPoT.sConns.Host = cast.ToString(val.(map[interface{}]interface{})["Host"])
 		}
 
-		if _, ok := v.(map[interface{}]interface{})["Port"]; ok {
-			adapterPoT.sConns.Port = cast.ToInt(v.(map[interface{}]interface{})["Port"])
+		if _, ok := val.(map[interface{}]interface{})["Port"]; ok {
+			adapterPoT.sConns.Port = cast.ToInt(val.(map[interface{}]interface{})["Port"])
 		}
 
-		if _, ok := v.(map[interface{}]interface{})["Username"]; ok {
-			adapterPoT.sConns.Username = cast.ToString(v.(map[interface{}]interface{})["Username"])
+		if _, ok := val.(map[interface{}]interface{})["Username"]; ok {
+			adapterPoT.sConns.Username = cast.ToString(val.(map[interface{}]interface{})["Username"])
 		}
 
-		if _, ok := v.(map[interface{}]interface{})["Password"]; ok {
-			adapterPoT.sConns.Password = cast.ToString(v.(map[interface{}]interface{})["Password"])
+		if _, ok := val.(map[interface{}]interface{})["Password"]; ok {
+			adapterPoT.sConns.Password = cast.ToString(val.(map[interface{}]interface{})["Password"])
 		}
 
-		adapters[k] = adapterPoT.instance()
+		adapters[key] = adapterPoT.instance()
 	}
 
 	return adapters

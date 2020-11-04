@@ -19,7 +19,7 @@ type (
 	PoT struct {
 		Prop *viper.Viper
 
-		vs *utils.PoT
+		v *utils.PoT
 		fs *files.PoT
 	}
 )
@@ -28,7 +28,7 @@ func New() *PoT {
 	return &PoT {
 		Prop: viper.New(),
 
-		vs: utils.New(),
+		v: utils.New(),
 		fs: files.New(),
 	}
 }
@@ -42,7 +42,7 @@ func (cfg *PoT) Load() *PoT {
 		panic(E.Err(data.ErrPfx, "PropEnvEmpty"))
 	}
 
-	if ok := cfg.vs.Contains(env, data.PropertySfxs); ok == false {
+	if ok := cfg.v.Contains(env, data.PropertySfxs ...); ok == false {
 		panic(E.Err(data.ErrPfx, "PropEnvExclude"))
 	}
 
@@ -75,20 +75,20 @@ func (cfg *PoT) Load() *PoT {
 	return cfg
 }
 
-func (cfg *PoT) GeT(k string, v interface{}) interface{} {
-	if cfg.Prop.IsSet(k) {
-		return cfg.Prop.Get(k)
+func (cfg *PoT) GeT(key string, val interface{}) interface{} {
+	if cfg.Prop.IsSet(key) {
+		return cfg.Prop.Get(key)
 	}
 
-	return v
+	return val
 }
 
-func (cfg *PoT) UsK(k string, v interface{}, opts ...viper.DecoderConfigOption) error {
-	return cfg.Prop.UnmarshalKey(k, v, opts ...)
+func (cfg *PoT) UsK(key string, val interface{}, opts ...viper.DecoderConfigOption) error {
+	return cfg.Prop.UnmarshalKey(key, val, opts ...)
 }
 
 func (cfg *PoT) tpl() string {
-	return cfg.vs.Sprintf(`## %v ##
+	return cfg.v.Sprintf(`## %v ##
 PoT:
   Name: "%v"
   Port: "%v"

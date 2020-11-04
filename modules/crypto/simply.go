@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func newToken() *SimplyPoT {
+func newSimply() *SimplyPoT {
 	return &SimplyPoT {
 
 	}

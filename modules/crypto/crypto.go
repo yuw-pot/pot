@@ -29,7 +29,7 @@ func New() *PoT {
 func (cryptoPoT *PoT) Made() (interface{}, error) {
 	switch cryptoPoT.Mode {
 	case data.ModeToken:
-		var res crypto = newToken()
+		var res crypto = newSimply()
 		return res.made(cryptoPoT.D ...)
 
 	case data.ModeRsA:

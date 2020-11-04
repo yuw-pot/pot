@@ -9,7 +9,7 @@ import (
 	"github.com/yuw-pot/pot/data"
 )
 
-func (m *M) Cors() gin.HandlerFunc{
+func (m *M) Cors() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		method := ctx.Request.Method
 		origin := ctx.Request.Header.Get("Origin")

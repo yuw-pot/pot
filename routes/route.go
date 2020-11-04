@@ -6,7 +6,9 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
+	"github.com/yuw-pot/pot/modules/crypto"
 	"github.com/yuw-pot/pot/modules/exceptions"
 )
 
@@ -18,14 +20,13 @@ var (
 type (
 	Routes interface {
 		Tag() string
-		PuT(r *PoT, toFunc map[*KeY][]gin.HandlerFunc)
+		PuT(r *gin.Engine, toFunc map[*KeY][]gin.HandlerFunc)
 	}
 
 	RouteSrc []Routes
 	RouteArr map[string]map[*KeY][]gin.HandlerFunc
 
 	PoT struct {
-		Eng *gin.Engine
 		Src *RouteSrc
 		Arr *RouteArr
 	}
@@ -39,18 +40,18 @@ type (
 	}
 )
 
-func (route *PoT) Made() *PoT {
+func (route *PoT) Made(r *gin.Engine) {
 	var exp *exceptions.PoT = exceptions.New()
 
 	/**
 	 * Todo: No Routes To Redirect
 	 */
-	route.Eng.NoRoute(exp.NoRoute)
+	r.NoRoute(exp.NoRoute)
 
 	/**
 	 * Todo: No Method To Redirect
 	 */
-	route.Eng.NoMethod(exp.NoMethod)
+	r.NoMethod(exp.NoMethod)
 
 	for _, to := range *route.Src {
 		if _, ok := (*route.Arr)[to.Tag()]; ok == false {
@@ -61,15 +62,23 @@ func (route *PoT) Made() *PoT {
 			continue
 		}
 
-		to.PuT(route, (*route.Arr)[to.Tag()])
+		to.PuT(r, (*route.Arr)[to.Tag()])
 	}
-
-	return route
 }
 
 func To(ctx *gin.RouterGroup, toFunc map[*KeY][]gin.HandlerFunc) {
 	for x, ctrl := range toFunc {
-		(*rMaP)[x.Service + x.Controller + x.Action] = x.Path
+		cry := crypto.New()
+
+		cry.Mode = data.ModeToken
+		cry.D = []interface{}{data.MD5, x.Service + x.Controller + x.Action}
+
+		k, err := cry.Made()
+		if err != nil {
+			panic(err)
+		}
+
+		(*rMaP)[cast.ToString(k)] = x.Path
 
 		switch x.Mode {
 		case PoTMethodAnY:

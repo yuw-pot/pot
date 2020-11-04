@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
-	E "github.com/yuw-pot/pot/modules/err"
-	P "github.com/yuw-pot/pot/modules/properties"
-	U "github.com/yuw-pot/pot/modules/utils"
-	R "github.com/yuw-pot/pot/routes"
+	"github.com/yuw-pot/pot/modules/err"
+	"github.com/yuw-pot/pot/modules/properties"
+	"github.com/yuw-pot/pot/modules/utils"
+	"github.com/yuw-pot/pot/routes"
 
 	_ "github.com/yuw-pot/pot/autoload"
 )
@@ -20,16 +20,16 @@ const version string = "v1.0.0"
 
 type (
 	PoT struct {
-		vPoT *U.PoT
+		vPoT *utils.PoT
 
-		PoTRoute *R.PoT
-		PoTError *E.PoT
+		PoTRoute *routes.PoT
+		PoTError *err.PoT
 	}
 )
 
 func New() *PoT {
 	return &PoT {
-		vPoT: U.New(),
+		vPoT: utils.New(),
 	}
 }
 
@@ -44,15 +44,14 @@ func (d *PoT) Run() {
 
 	r := gin.New()
 
-	PoTMode := P.PropertyPoT.GeT("PoT.Mode", "1")
+	PoTMode := properties.PropertyPoT.GeT("PoT.Mode", "1")
 	if d.vPoT.Contains(PoTMode, 0,1) == false {
 		PoTMode = 1
 	}
 
 	d.setMode(r, data.PoTMode[cast.ToInt(PoTMode)])
 
-	R.RPoT.Eng = r
-	r = R.RPoT.Made().Eng
+	routes.RPoT.Made(r)
 
 	// Https Power ON/OFF
 	//   - PoT.Hssl
@@ -60,17 +59,17 @@ func (d *PoT) Run() {
 	//     - PoT.Hssl.CertFile
 	//     - PoT.Hssl.KeysFile
 	var rErr error
-	strPoTPort := ":"+cast.ToString(P.PropertyPoT.GeT("PoT.Port", data.PropertyPort))
+	strPoTPort := ":"+cast.ToString(properties.PropertyPoT.GeT("PoT.Port", data.PropertyPort))
 
-	if P.PropertyPoT.GeT("PoT.Hssl.Power", 0) == 1 {
-		PoTHsslCertFile := cast.ToString(P.PropertyPoT.GeT("PoT.Hssl.CertFile", ""))
+	if properties.PropertyPoT.GeT("PoT.Hssl.Power", 0) == 1 {
+		PoTHsslCertFile := cast.ToString(properties.PropertyPoT.GeT("PoT.Hssl.CertFile", ""))
 		if PoTHsslCertFile == "" {
-			panic(E.Err(data.ErrPfx, "PoTSslCF"))
+			panic(err.Err(data.ErrPfx, "PoTSslCF"))
 		}
 
-		PoTHsslKeysFile := cast.ToString(P.PropertyPoT.GeT("PoT.Hssl.KeysFile", ""))
+		PoTHsslKeysFile := cast.ToString(properties.PropertyPoT.GeT("PoT.Hssl.KeysFile", ""))
 		if PoTHsslKeysFile == "" {
-			panic(E.Err(data.ErrPfx, "PoTSslKF"))
+			panic(err.Err(data.ErrPfx, "PoTSslKF"))
 		}
 
 		d.vPoT.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTPs on %v\n", data.PoT, strPoTPort)
@@ -90,12 +89,12 @@ func (d *PoT) Run() {
 
 func (d *PoT) PoT() *PoT {
 	// Routes Initialized
-	R.RPoT = d.PoTRoute
+	routes.RPoT = d.PoTRoute
 
 	// Err Modules Initialize
 	//   - Combine Error Message of Self Define
-	E.EPoT = d.PoTError
-	E.EPoT.ErrPoTCombine()
+	err.EPoT = d.PoTError
+	err.EPoT.ErrPoTCombine()
 
 	return d
 }

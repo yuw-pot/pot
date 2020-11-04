@@ -9,8 +9,8 @@ import (
 	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/yuw-pot/pot/data"
-	P "github.com/yuw-pot/pot/modules/properties"
-	Z "github.com/yuw-pot/pot/modules/zlog"
+	"github.com/yuw-pot/pot/modules/properties"
+	"github.com/yuw-pot/pot/modules/zlog"
 	"time"
 )
 
@@ -29,14 +29,14 @@ func (d *PoT) setMode(r *gin.Engine, mode interface{}) {
 		// GeT Log Configure
 		//   - data.ZLogPoT construct
 		var zLogPoT *data.ZLogPoT = nil
-		_ = P.PropertyPoT.UsK("Logs.PoT", &zLogPoT)
+		_ = properties.PropertyPoT.UsK("Logs.PoT", &zLogPoT)
 
 		if zLogPoT == nil {
 			zLogPoT = &data.ZLogPoT{}
 		}
 
 		// - Zap Log New
-		zLog := Z.New(zLogPoT)
+		zLog := zlog.New(zLogPoT)
 		// - Zap Log Made
 		zLogMade := zLog.Made()
 

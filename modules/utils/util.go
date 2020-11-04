@@ -88,8 +88,8 @@ func (v *PoT) Contains(k interface{}, d ...interface{}) bool {
 		return false
 	}
 
-	for _, v := range d {
-		if strings.Contains(cast.ToString(k), cast.ToString(v)) {
+	for _, val := range d {
+		if strings.Contains(cast.ToString(k), cast.ToString(val)) {
 			return true
 		}
 	}
@@ -97,13 +97,22 @@ func (v *PoT) Contains(k interface{}, d ...interface{}) bool {
 	return false
 }
 
+func (v *PoT) MergeH(d ... *data.H) *data.H {
+	h := &data.H{}
+	for _, val := range d {
+		if val != nil {
+			for k, data := range *val {
+				(*h)[k] = data
+			}
+		}
+	}
+
+	return h
+}
+
 func (v *PoT) NumRandom(min, max int) int {
 	rand.Seed(time.Now().Unix())
 	return rand.Intn(max-min) + min
-}
-
-func (v *PoT) StructXToY(x interface{}, y interface{}) {
-
 }
 
 func (v *PoT) Fprintf(writer io.Writer, format string, d ... interface{}) {

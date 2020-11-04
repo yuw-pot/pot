@@ -53,10 +53,6 @@ var (
 			"AdapterMadeName":	"Error Engine db Name",
 			"AdapterEngineErr":	"Engine Connect Error",
 
-			"CpCacheClient":	"Missing Client",
-			"CpCacheSeTParams":	"Error SeT Parameters",
-			"CpCacheSeTExp":	"Error SeT expiration",
-
 			"TokenParamsErr":	"Missing Token Parameters",
 			"TokenTypeErr":		"Error Token Type(MD5|SHA1|SHA256)",
 
@@ -64,6 +60,9 @@ var (
 			"TokenNotValidYet": "Token hasn't active yet",
 			"TokenMalformed": 	"That's not even a token",
 			"TokenInvalid": 	"Token Invalid",
+
+			"ComponentCacheClient":		"Missing Client",
+			"ComponentCacheSeTParams":	"Error SeT Parameters",
 		},
 	}
 )

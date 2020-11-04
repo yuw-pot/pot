@@ -6,6 +6,7 @@ package services
 
 import (
 	"github.com/spf13/cast"
+	"github.com/yuw-pot/pot/routes"
 	"math"
 )
 
@@ -15,18 +16,22 @@ const (
 )
 
 type (
-	services struct {
+	Services struct {
 
 	}
 )
 
-func New() *services {
-	return &services {
+func New() *Services {
+	return &Services {
 
 	}
 }
 
-func (srv *services) Paginator(page int, pageNums int, pageSize ...int) (paginator map[string]interface{}) {
+func (srv *Services) GeTPath(service, controller, action string) (interface{}, error) {
+	return routes.GeTPath(service, controller, action)
+}
+
+func (srv *Services) Paginator(page int, pageNums int, pageSize ...int) (paginator map[string]interface{}) {
 	var (
 		nums int = pageNums
 		size int
@@ -94,7 +99,7 @@ func (srv *services) Paginator(page int, pageNums int, pageSize ...int) (paginat
 	return
 }
 
-func (srv *services) PaginatorParams(strPage string, strSize string) (page int, size int) {
+func (srv *Services) PaginatorParams(strPage string, strSize string) (page int, size int) {
 	if strPage != "" {
 		page = cast.ToInt(strPage)
 	} else {

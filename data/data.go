@@ -13,12 +13,6 @@ const (
 
 	// Time Location
 	TimeLocation	string = "Asia/Shanghai"
-
-	// Models
-	ModONE		string = "ONE"
-	ModALL		string = "ALL"
-	ModByAsc	string = "ASC"
-	ModByEsc	string = "DESC"
 )
 
 var (
@@ -29,10 +23,6 @@ var (
 )
 
 type (
-	/**
-	 * Map Struct
-	 */
-
 	// Default Type
 	H map[string]interface{}
 
@@ -41,29 +31,21 @@ type (
 
 	// Power
 	PowerPoT struct {
-		JwT 			int `yaml:"jwt" json:"jwt"`
-		Adapter 		int	`yaml:"adapter" json:"adapter"`
-		Redis 			int `yaml:"redis" json:"redis"`
+		JwT 	int `yaml:"jwt" json:"jwt"`
+		Adapter int	`yaml:"adapter" json:"adapter"`
+		Redis 	int `yaml:"redis" json:"redis"`
 	}
 
-	SrvPoT struct {
+	TpL struct {
 		Status int
 		Msg interface{}
 		Response *H
 	}
 
-	ModPoT struct {
-		Types 		string `json:"types"`// Todo: "ONE"->"FetchOne" "ALL"->"FetchAll"
-		Table 		string `json:"table"`
-		Field 		string `json:"field"`
-		Joins 		[][]interface{} `json:"joins"`
-		Limit 		int `json:"limit"`
-		Start 		[]int `json:"start"`
-		Query 		interface{} `json:"query"`
-		QueryArgs 	[]interface{} `json:"query_args"`
-		Columns 	[]string `json:"columns"`
-		OrderType 	string `json:"order_type"`
-		OrderArgs 	[]string `json:"order_args"`
+	SrvTpL struct {
+		Status int
+		Msg interface{}
+		Data *H
 	}
 
 	/**
@@ -85,3 +67,19 @@ type (
 		MaxAge 			int `yaml:"max_age" json:"max_age"`
 	}
 )
+
+func SrvTpLInitialized() *SrvTpL {
+	return &SrvTpL {
+		Status: PoTStatusOK,
+		Msg:    nil,
+		Data:   nil,
+	}
+}
+
+func TpLInitialized() *TpL {
+	return &TpL {
+		Status: PoTStatusOK,
+		Msg:    nil,
+		Response: &H{},
+	}
+}

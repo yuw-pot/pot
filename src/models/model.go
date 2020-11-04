@@ -6,9 +6,9 @@ package models
 
 import (
 	"github.com/go-xorm/xorm"
-	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
+	"strings"
 )
 
 type Models struct {
@@ -19,6 +19,10 @@ func New(engine *xorm.Engine) *Models {
 	return &Models {
 		engine: engine,
 	}
+}
+
+func (m *Models) Engine() *xorm.Engine {
+	return m.engine
 }
 
 func (m *Models) Insert(d interface{}) (i int64, err error) {
@@ -69,19 +73,19 @@ func (m *Models) Delete(mPoT *data.ModPoT, d interface{}) (i int64, err error) {
 	return db.Where(mPoT.Query, mPoT.QueryArgs ...).Delete(d)
 }
 
-func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) error {
+func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) (bool, error) {
 	db := m.engine.NewSession()
 
 	defer func() {
 		db.Close()
 	}()
 
-	if mPoT.Table != "" && mPoT.Field != "" {
+	if mPoT.Table != "" && mPoT.Field != nil {
 		if ok, _ := db.IsTableExist(mPoT.Table); ok == false {
-			return E.Err(data.ErrPfx, "ModDBTable")
+			return false, E.Err(data.ErrPfx, "ModDBTable")
 		}
 
-		db = db.Table(mPoT.Table).Select(mPoT.Field)
+		db = db.Table(mPoT.Table).Select(strings.Join(mPoT.Field,","))
 	} else {
 		if mPoT.Columns != nil {
 			db = db.Cols(mPoT.Columns ...)
@@ -96,13 +100,7 @@ func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) error {
 	//   - RIGHT
 	if mPoT.Joins != nil {
 		for _, join := range mPoT.Joins {
-			if len(join) > 2 {
-				db = db.Join(
-					cast.ToString(join[0]),
-					join[1],
-					cast.ToString(join[2]),
-				)
-			}
+			db = db.Join(join.JoinOperator, join.TableName, join.Condition)
 		}
 	}
 
@@ -114,9 +112,7 @@ func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) error {
 	switch mPoT.Types {
 
 	case data.ModONE:
-
-		_, err := db.Get(d)
-		return err
+		return db.Get(d)
 
 	case data.ModALL:
 
@@ -139,9 +135,9 @@ func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) error {
 			db = db.Limit(mPoT.Limit, mPoT.Start ...)
 		}
 
-		return db.Find(d)
+		return true, db.Find(d)
 
 	default:
-		return E.Err(data.ErrPfx, "ModDBSelectErr")
+		return false, E.Err(data.ErrPfx, "ModDBSelectErr")
 	}
 }
