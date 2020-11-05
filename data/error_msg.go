@@ -61,6 +61,9 @@ var (
 			"TokenMalformed": 	"That's not even a token",
 			"TokenInvalid": 	"Token Invalid",
 
+			"CryptoParamsErr":	"Params Empty",
+			"CryptoAeSKeYErr":	"AES KeY Type Error",
+
 			"ComponentCacheClient":		"Missing Client",
 			"ComponentCacheSeTParams":	"Error SeT Parameters",
 		},

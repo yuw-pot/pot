@@ -36,6 +36,10 @@ func (cryptoPoT *PoT) Made() (interface{}, error) {
 		var res crypto = newRsA()
 		return res.made(cryptoPoT.D ...)
 
+	case data.ModeAeS:
+		var res crypto = newAeS()
+		return res.made(cryptoPoT.D ...)
+
 	default:
 		return "", nil
 	}
