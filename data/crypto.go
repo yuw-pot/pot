@@ -5,11 +5,6 @@
 package data
 
 const (
-	// Crypto
-	JwTKeY		string = "PoT*!^YwY#JwT"
-	JwTExpire	int = 1
-	JwTMode		string = "H"
-
 	AeSKeY		string = "PoT*!^YwY#AeS"
 
 	MD5			string = "MD5"

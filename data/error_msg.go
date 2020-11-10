@@ -12,8 +12,7 @@ import (
 const (
 	// Err Message Keywords
 	ErrPfx string = PoT
-
-	PoTSuccessOK 	= "SuccessOK"
+	PoTSuccessOK string = "SuccessOK"
 )
 
 var (
@@ -63,6 +62,14 @@ var (
 
 			"CryptoParamsErr":	"Params Empty",
 			"CryptoAeSKeYErr":	"AES KeY Type Error",
+
+			"JwTKeYErr":		"Err Key",
+			"JwTKeYEmpty":		"Empty Key",
+			"JwTCacheErr":		"Err Cache Client",
+			"JwTExpireErr":		"JwT Expire is 0",
+			"JwTInfoType":		"JwT Info is not struct",
+			"JwTInfoEmpty":		"JwT Info is empty",
+			"JwTCacheResult":	"JwT Token & Encrypt is empty",
 
 			"ComponentCacheClient":		"Missing Client",
 			"ComponentCacheSeTParams":	"Error SeT Parameters",

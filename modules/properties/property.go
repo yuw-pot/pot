@@ -189,7 +189,7 @@ data.PropertyRedis,
 // - JwT Key
 data.JwTKeY,
 data.JwTExpire,
-data.JwTMode,
+data.JwTMethod,
 // - Log
 data.LogFileName,
 data.LogFormatConsole,

@@ -7,11 +7,11 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yuw-pot/pot/data"
-	"github.com/yuw-pot/pot/modules/auth"
 	E "github.com/yuw-pot/pot/modules/err"
+	J "github.com/yuw-pot/pot/modules/jwt"
 )
 
-func (m *M) JwTAuth() gin.HandlerFunc {
+func (m *M) JwTMemoryAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		TpL := data.TpLInitialized()
 		TpL.Status = data.PoTUnKnown
@@ -25,7 +25,7 @@ func (m *M) JwTAuth() gin.HandlerFunc {
 			return
 		}
 
-		JwT, err := auth.JPoT.Parse(token)
+		JwT, err := J.JPoT.Parse(token)
 		if err != nil {
 			if err == E.Err(data.ErrPfx, "TokenExpired") {
 				TpL.Msg = E.Err(data.ErrPfx, "MWareUnknown").Error()
@@ -42,7 +42,7 @@ func (m *M) JwTAuth() gin.HandlerFunc {
 			}
 		}
 
-		JwTRefresh, _ := auth.JPoT.Refresh(token)
+		JwTRefresh, _ := J.JPoT.Refresh(token)
 
 		ctx.Set("JwT", JwTRefresh)
 		ctx.Set("JwTInfo", JwT)

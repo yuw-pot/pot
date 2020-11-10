@@ -113,6 +113,14 @@ func (r *RedisComponent) IsHExisT(key, field string) (bool, error) {
 	return true, nil
 }
 
+func (r *RedisComponent) Publish(channel string, message interface{}) (interface{}, error) {
+	if err := r.check(); err != nil {
+		return nil, err
+	}
+
+	return r.client.Publish(r.ctx, channel, message).Result()
+}
+
 func (r *RedisComponent) SeTPrefix(pfx string) *RedisComponent {
 	if pfx == "" {
 		return r

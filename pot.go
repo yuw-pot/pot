@@ -10,6 +10,7 @@ import (
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/err"
 	"github.com/yuw-pot/pot/modules/properties"
+	"github.com/yuw-pot/pot/modules/subscriber"
 	"github.com/yuw-pot/pot/modules/utils"
 	"github.com/yuw-pot/pot/routes"
 
@@ -24,6 +25,7 @@ type (
 
 		PoTRoute *routes.PoT
 		PoTError *err.PoT
+		PoTSubscriber *subscriber.PoT
 	}
 )
 
@@ -95,6 +97,11 @@ func (d *PoT) PoT() *PoT {
 	//   - Combine Error Message of Self Define
 	err.EPoT = d.PoTError
 	err.EPoT.ErrPoTCombine()
+
+	// Subscriber Initialize
+	if d.PoTSubscriber != nil {
+		subscriber.StarT(d.PoTSubscriber)
+	}
 
 	return d
 }

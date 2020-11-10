@@ -10,9 +10,6 @@ const (
 	// PoT Mode
 	ReleaseMode	string = "release"
 	ConsoleMode string = "console"
-
-	// Time Location
-	TimeLocation	string = "Asia/Shanghai"
 )
 
 var (

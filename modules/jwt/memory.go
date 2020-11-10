@@ -2,80 +2,73 @@
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
-package auth
+package jwt
 
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
-	"strings"
 	"time"
 )
 
 type (
-	JwT struct {
+	JMemory struct {
 		KeY 	string
 		Expire 	time.Duration
 		Mode 	string
 	}
 
-	JwTPoT struct {
+	JMemoryPoT struct {
 		Info interface{}
 		jwt.StandardClaims
 	}
 )
 
-var JPoT *JwT
+var JPoT *JMemory
 
-func (j *JwT) Made(jp *JwTPoT) (string, error) {
+func (j *JMemory) Produce(jp *JMemoryPoT) (string, error) {
 	jwt.TimeFunc = func() time.Time {
 		return time.Unix(0, 0)
 	}
 
 	jwt.TimeFunc = time.Now
+	expire := j.Expire * getTimeUniT(j.Mode)
 
-	timeUnit := time.Hour
-	if strings.ToLower(j.Mode) == "m" {
-		timeUnit = time.Minute
-	} else if strings.ToLower(j.Mode) == "s" {
-		timeUnit = time.Second
-	}
-
-	jp.StandardClaims.ExpiresAt = time.Now().Add(j.Expire * timeUnit).Unix()
+	jp.StandardClaims.ExpiresAt = time.Now().Add(expire).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jp)
 	return token.SignedString([]byte(j.KeY))
 }
 
-func (j *JwT) Parse(sign string) (*JwTPoT, error) {
+func (j *JMemory) Parse(sign string) (*JMemoryPoT, error) {
 	token, err := j.parse(sign)
 	if err != nil {
 		return nil, err
 	}
 
-	if jp, ok := token.Claims.(*JwTPoT); ok && token.Valid {
+	if jp, ok := token.Claims.(*JMemoryPoT); ok && token.Valid {
 		return jp, nil
 	}
 
 	return nil, E.Err(data.ErrPfx, "TokenInvalid")
 }
 
-func (j *JwT) Refresh(sign string) (string, error) {
+func (j *JMemory) Refresh(sign string) (string, error) {
 	token, err := j.parse(sign)
 	if err != nil {
 		return "", err
 	}
 
-	if jp, ok := token.Claims.(*JwTPoT); ok && token.Valid {
-		return j.Made(jp)
+	if jp, ok := token.Claims.(*JMemoryPoT); ok && token.Valid {
+		return j.Produce(jp)
 	}
 
 	return "", E.Err(data.ErrPfx, "TokenInvalid")
 }
 
-func (j *JwT) parse(sign string) (*jwt.Token, error)  {
+func (j *JMemory) parse(sign string) (*jwt.Token, error)  {
 	token, err := jwt.ParseWithClaims(
-		sign, &JwTPoT{},
+		sign, &JMemoryPoT{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(j.KeY), nil
 		},
@@ -99,7 +92,3 @@ func (j *JwT) parse(sign string) (*jwt.Token, error)  {
 		return token, nil
 	}
 }
-
-
-
-

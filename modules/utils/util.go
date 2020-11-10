@@ -5,6 +5,8 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
@@ -14,6 +16,8 @@ import (
 	"strings"
 	"time"
 )
+
+const char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 type (
 	PoT struct {
@@ -25,6 +29,17 @@ func New() *PoT {
 	return &PoT {
 
 	}
+}
+
+func (v *PoT) RandString(size int) string {
+	rand.NewSource(time.Now().UnixNano())
+
+	var res bytes.Buffer
+	for i := 0; i < size; i ++ {
+		res.WriteByte(char[rand.Int63() % int64(len(char))])
+	}
+
+	return res.String()
 }
 
 func (v *PoT) IsInT(d interface{}) bool {
@@ -95,6 +110,20 @@ func (v *PoT) Contains(k interface{}, d ...interface{}) bool {
 	}
 
 	return false
+}
+
+func (v *PoT) ToJson(d interface{}) (interface{}, error) {
+	res, err := json.Marshal(d)
+	if err != nil { return nil, err }
+
+	return string(res), nil
+}
+
+func (v *PoT) ToStruct(d interface{}, res interface{}) error {
+	err := json.Unmarshal([]byte(cast.ToString(d)), res)
+	if err != nil { return err }
+
+	return nil
 }
 
 func (v *PoT) MergeH(d ... *data.H) *data.H {

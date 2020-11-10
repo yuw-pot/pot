@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/adapter"
-	"github.com/yuw-pot/pot/modules/auth"
+	"github.com/yuw-pot/pot/modules/jwt"
 	"github.com/yuw-pot/pot/modules/cache/redis"
 	"github.com/yuw-pot/pot/modules/err"
 	"github.com/yuw-pot/pot/modules/properties"
@@ -37,8 +37,8 @@ func init() {
 
 	//   - add JwT Key
 	if adPowerPoT.JwT == 1 {
-		_ = properties.PropertyPoT.UsK("JwT", &auth.JPoT)
-		if auth.JPoT == nil {
+		_ = properties.PropertyPoT.UsK("JwT", &jwt.JPoT)
+		if jwt.JPoT == nil {
 			panic(err.Err(data.ErrPfx, "PoTJwTErr"))
 		}
 	}
