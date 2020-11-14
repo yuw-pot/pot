@@ -6,7 +6,6 @@ package adapter
 
 import (
 	"fmt"
-	"github.com/go-xorm/xorm"
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
@@ -14,6 +13,7 @@ import (
 	"github.com/yuw-pot/pot/modules/utils"
 	"strings"
 	"time"
+	"xorm.io/xorm"
 )
 
 const (
@@ -26,42 +26,37 @@ const (
 
 type (
 	PoT struct {
-		v *utils.PoT
-		dn interface{}
-		name string
-		sConns *srcConns
-		sParam *srcParam
-		timeLocation *time.Location
+		v 				*utils.PoT
+		sConns 			*srcConns
+		sParam 			*srcParam
+		timeLocation 	*time.Location
+
+		driver 			interface{}
 	}
 
 	srcParam struct {
-		MaxOpen int
-		MaxIdle int
-		ShowedSQL bool
-		CachedSQL bool
+		Policy 		string
+		MaxOpen 	int
+		MaxIdle 	int
+		ShowedSQL 	bool
+		CachedSQL 	bool
 	}
 
 	srcConns struct {
-		Host string
-		Port int
-		Username string
-		Password string
+		Repo 		string
+		Host 		string
+		Port 		int
+		Username 	string
+		Password 	string
 	}
 )
 
 var (
-	dModes []interface{} = []interface{}{
-		Master,
-		Slaver,
-	}
+	dModes []interface{} = []interface{}{ Master, Slaver }
+	dNames []interface{} = []interface{}{ Mysql, PostgreSQL }
 
-	dNames []interface{} = []interface{}{
-		Mysql,
-		PostgreSQL,
-	}
-
-	//  - map[DriverName][dbName][]*xorm.Engine
-	adapterMaster map[interface{}]map[interface{}][]*xorm.Engine = map[interface{}]map[interface{}][]*xorm.Engine{
+	//  - map[DriverName][Label][]*xorm.Engine
+	adapterMaster map[interface{}]map[interface{}]*xorm.Engine = map[interface{}]map[interface{}]*xorm.Engine{
 		Mysql:      {},
 		PostgreSQL: {},
 	}
@@ -72,97 +67,52 @@ var (
 	}
 )
 
-func Made(driverName string, name string, mode ... interface{}) (*xorm.Engine, error) {
-	v := utils.New()
-	if ok := v.Contains(driverName, dNames); ok == false {
-		return nil, E.Err(data.ErrPfx, "AdapterMadeDN")
+func Conns(driver, label string) (map[interface{}][]*xorm.Engine, error) {
+	var ok bool
+	_, ok = adapterMaster[driver]
+	if ok == false {
+		return nil, E.Err(data.ErrPfx, "AdapterMode")
 	}
 
-	var modeAdapter interface{}
-
-	if len(mode) == 0 {
-		modeAdapter = Master
-	} else {
-		if ok := v.Contains(mode[0], dModes); ok {
-			modeAdapter = mode[0]
-		} else {
-			return nil, E.Err(data.ErrPfx, "AdapterMadeMode")
-		}
+	_, ok = adapterSlaver[driver]
+	if ok == false {
+		return nil, E.Err(data.ErrPfx, "AdapterMode")
 	}
 
-	switch modeAdapter {
-	case Master:
-		_, okd := adapterMaster[driverName]
-		if okd == false {
-			return nil, E.Err(data.ErrPfx, "AdapterMadeDN")
-		}
-
-		_, okn := adapterMaster[driverName][name]
-		if okn == false {
-			return nil, E.Err(data.ErrPfx, "AdapterMadeName")
-		}
-
-		break
-
-	case Slaver:
-		_, okd := adapterSlaver[driverName]
-		if okd == false {
-			return nil, E.Err(data.ErrPfx, "AdapterMadeDN")
-		}
-
-		_, okn := adapterSlaver[driverName][name]
-		if okn == false {
-			return nil, E.Err(data.ErrPfx, "AdapterMadeName")
-		}
-
-		break
-
-	default:
-		return nil, E.Err(data.ErrPfx, "AdapterMadeMode")
-		break
+	_, ok = adapterMaster[driver][strings.ToLower(label)]
+	if ok == false {
+		return nil, E.Err(data.ErrPfx, "AdapterModeName")
 	}
 
-	var (
-		mLen int = len(adapterMaster[driverName][name])
-		sLen int = len(adapterSlaver[driverName][name])
-	)
-
-	if len(mode) == 0 {
-		return adapterMaster[driverName][name][v.NumRandom(0, mLen)], nil
+	_, ok = adapterSlaver[driver][strings.ToLower(label)]
+	if ok == false {
+		return nil, E.Err(data.ErrPfx, "AdapterModeName")
 	}
 
-	var x *xorm.Engine
+	var conns map[interface{}][]*xorm.Engine = map[interface{}][]*xorm.Engine{}
 
-	switch strings.ToLower(cast.ToString(mode[0])) {
-	case "master":
-		x =  adapterMaster[driverName][name][v.NumRandom(0, mLen)]
-		break
+	conns[Master] = make([]*xorm.Engine, 1)
+	conns[Master][0] = adapterMaster[driver][strings.ToLower(label)]
 
-	case "slaver":
-		x =  adapterSlaver[driverName][name][v.NumRandom(0, sLen)]
-		break
+	conns[Slaver] = make([]*xorm.Engine, len(adapterSlaver[driver][strings.ToLower(label)]))
+	conns[Slaver] = adapterSlaver[driver][strings.ToLower(label)]
 
-	default:
-		return nil, E.Err(data.ErrPfx, "AdapterMadeMode")
-	}
-
-	return x, nil
+	return conns, nil
 }
 
 func New() *PoT {
-	return &PoT {
-		v: utils.New(),
-	}
+	adapter := &PoT{}
+	adapter.v = utils.New()
+
+	return adapter.initialized()
 }
 
-func (adapterPoT *PoT) Made() {
+func (adapterPoT *PoT) initialized() *PoT {
 	// Set db Time Location
 	//   - GeT Configure
 	adapterTimeLocation := properties.PropertyPoT.GeT("PoT.TimeLocation", data.TimeLocation)
 	d, err := adapterPoT.v.SetTimeLocation(cast.ToString(adapterTimeLocation))
-	if err != nil {
-		panic(err)
-	}
+	if err != nil { panic(err) }
 
 	adapterPoT.timeLocation = d
 
@@ -178,72 +128,121 @@ func (adapterPoT *PoT) Made() {
 			continue
 		}
 
-		adapterPoT.dn = dn
+		adapterPoT.driver = dn
 		adapterPoT.sParam = sParam
 
 		adapterConns := properties.PropertyPoT.GeT(
-			fmt.Sprintf("Adapter.%v.Conns", cast.ToString(dn)),
-			nil,
+			fmt.Sprintf("Adapter.%v.Conns", cast.ToString(dn)),nil,
 		)
 
 		if adapterConns == nil {
 			continue
 		}
 
-		for db, conns := range adapterConns.(map[string]interface{}) {
-			dbTag := strings.Split(db, "_")
+		for label, conns := range adapterConns.(map[string]interface{}) {
+			var connsTo map[string]interface{} = conns.(map[string]interface{})
 
-			if len(dbTag) <= 1 || dbTag[1] == "" {
-				continue
-			}
-
-			adapterPoT.name = strings.Join(dbTag[1:], "_")
-
-			master, okMaster := conns.(map[string]interface{})["master"]
+			master, okMaster := connsTo["master"]
 			if okMaster == false || master == nil {
-				continue
+				content := fmt.Sprintf("Adapter.%v.Conns.%v.Master", dn, label)
+				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
 			}
 
-			adapterMaster[dn][adapterPoT.name] = make([]*xorm.Engine, len(master.([]interface{})))
-			adapterMaster[dn][adapterPoT.name] = adapterPoT.check(master.([]interface{}) ...)
-
-			slaver, okSlaver := conns.(map[string]interface{})["slaver"]
+			slaver, okSlaver := connsTo["slaver"]
 			if okSlaver == false || slaver == nil {
-				continue
+				content := fmt.Sprintf("Adapter.%v.Conns.%v.Slaver", dn, label)
+				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
 			}
 
-			adapterSlaver[dn][adapterPoT.name] = make([]*xorm.Engine, len(slaver.([]interface{})))
-			adapterSlaver[dn][adapterPoT.name] = adapterPoT.check(slaver.([]interface{}) ...)
+			adapterMaster[dn][label] = adapterPoT.validate(master.(map[string]interface{}))
+			if adapterMaster[dn][label] == nil {
+				content := fmt.Sprintf("Adapter.%v.Conns.%v.Master", dn, label)
+				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
+			}
+
+			adapterSlaver[dn][label] = make([]*xorm.Engine, len(slaver.([]interface{})))
+			adapterSlaver[dn][label] = adapterPoT.validateGroup(slaver.([]interface{}) ...)
 		}
 	}
+
+	return adapterPoT
 }
 
-func (adapterPoT *PoT) check(d ... interface{}) []*xorm.Engine {
+func (adapterPoT *PoT) validate(d map[string]interface{}) *xorm.Engine {
+	adapterPoT.sConns = &srcConns {
+		Repo:     "",
+		Host:     "",
+		Port:     0,
+		Username: "",
+		Password: "",
+	}
+
+	repo, ok := d["repo"]
+	if ok == false { return nil }
+
+	host, ok := d["host"]
+	if ok == false { return nil }
+
+	port, ok := d["port"]
+	if ok == false { return nil }
+
+	username, ok := d["username"]
+	if ok == false { return nil }
+
+	password, ok := d["password"]
+	if ok == false { return nil }
+
+	adapterPoT.sConns.Repo = cast.ToString(repo)
+	adapterPoT.sConns.Host = cast.ToString(host)
+	adapterPoT.sConns.Port = cast.ToInt(port)
+	adapterPoT.sConns.Username = cast.ToString(username)
+	adapterPoT.sConns.Password = cast.ToString(password)
+
+	return adapterPoT.instance()
+}
+
+func (adapterPoT *PoT) validateGroup(d ... interface{}) []*xorm.Engine {
 	var adapters []*xorm.Engine = make([]*xorm.Engine, len(d))
 
 	for key, val := range d {
 		adapterPoT.sConns = &srcConns {
+			Repo:     "",
 			Host:     "",
 			Port:     0,
 			Username: "",
 			Password: "",
 		}
-
-		if _, ok := val.(map[interface{}]interface{})["Host"]; ok {
-			adapterPoT.sConns.Host = cast.ToString(val.(map[interface{}]interface{})["Host"])
+		
+		repo, ok := val.(map[interface{}]interface{})["Repo"]
+		if ok == false {
+			continue
 		}
 
-		if _, ok := val.(map[interface{}]interface{})["Port"]; ok {
-			adapterPoT.sConns.Port = cast.ToInt(val.(map[interface{}]interface{})["Port"])
+		host, ok := val.(map[interface{}]interface{})["Host"]
+		if ok == false {
+			continue
 		}
 
-		if _, ok := val.(map[interface{}]interface{})["Username"]; ok {
-			adapterPoT.sConns.Username = cast.ToString(val.(map[interface{}]interface{})["Username"])
+		port, ok := val.(map[interface{}]interface{})["Port"]
+		if ok == false {
+			continue
 		}
 
-		if _, ok := val.(map[interface{}]interface{})["Password"]; ok {
-			adapterPoT.sConns.Password = cast.ToString(val.(map[interface{}]interface{})["Password"])
+		username, ok := val.(map[interface{}]interface{})["Username"]
+		if ok == false {
+			continue
 		}
+
+		password, ok := val.(map[interface{}]interface{})["Password"]
+		if ok == false {
+			continue
+		}
+
+		adapterPoT.sConns.Repo = cast.ToString(repo)
+		adapterPoT.sConns.Host = cast.ToString(host)
+		adapterPoT.sConns.Port = cast.ToInt(port)
+		adapterPoT.sConns.Username = cast.ToString(username)
+		adapterPoT.sConns.Password = cast.ToString(password)
 
 		adapters[key] = adapterPoT.instance()
 	}
@@ -252,19 +251,11 @@ func (adapterPoT *PoT) check(d ... interface{}) []*xorm.Engine {
 }
 
 func (adapterPoT *PoT) instance() *xorm.Engine {
-	db := dbNew()
+	objODBC := newODBC()
+	objODBC.dn 				= adapterPoT.driver
+	objODBC.sParam			= adapterPoT.sParam
+	objODBC.sConns			= adapterPoT.sConns
+	objODBC.timeLocation	= adapterPoT.timeLocation
 
-	db.dn = adapterPoT.dn
-	db.name = adapterPoT.name
-	db.sParam = adapterPoT.sParam
-	db.sConns = adapterPoT.sConns
-	db.timeLocation = adapterPoT.timeLocation
-
-	db.instance()
-
-	return db.xEngine()
+	return objODBC.instance().xEngine()
 }
-
-
-
-

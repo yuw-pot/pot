@@ -13,6 +13,7 @@ import (
 	"io"
 	"math/rand"
 	"reflect"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -139,9 +140,20 @@ func (v *PoT) MergeH(d ... *data.H) *data.H {
 	return h
 }
 
-func (v *PoT) NumRandom(min, max int) int {
-	rand.Seed(time.Now().Unix())
-	return rand.Intn(max-min) + min
+func (v *PoT) GeTUintPtrFuncPC() (interface{}, interface{}, interface{}) {
+	funcPCUintPtr := make([]uintptr, 1)
+	runtime.Callers(2, funcPCUintPtr)
+	funcPCName := runtime.FuncForPC(funcPCUintPtr[0]).Name()
+	ptrFuncPCName := strings.Split(funcPCName, "/")
+
+	srvFuncPCName := ptrFuncPCName[len(ptrFuncPCName)-2]
+	ctrFuncPCName := strings.Split(ptrFuncPCName[len(ptrFuncPCName)-1], ".")
+
+	return srvFuncPCName, ctrFuncPCName[len(ctrFuncPCName)-2], ctrFuncPCName[len(ctrFuncPCName)-1]
+}
+
+func (v *PoT) NumRandom(max int) int {
+	return rand.New(rand.NewSource(time.Now().Unix())).Intn(max)
 }
 
 func (v *PoT) Fprintf(writer io.Writer, format string, d ... interface{}) {

@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/adapter"
-	"github.com/yuw-pot/pot/modules/jwt"
 	"github.com/yuw-pot/pot/modules/cache/redis"
 	"github.com/yuw-pot/pot/modules/err"
+	"github.com/yuw-pot/pot/modules/jwt"
 	"github.com/yuw-pot/pot/modules/properties"
 )
 
@@ -25,33 +25,23 @@ func init() {
 	//   - assign the properties.PropertyPoT
 	ad.property()
 
-	if properties.PropertyPoT == nil {
-		panic(err.Err(data.ErrPfx, "AdPropVar"))
-	}
+	if properties.PropertyPoT == nil { panic(err.Err(data.ErrPfx, "AdPropVar")) }
 
 	var adPowerPoT *data.PowerPoT
 	_ = properties.PropertyPoT.UsK("Power", &adPowerPoT)
-	if adPowerPoT == nil {
-		panic(err.Err(data.ErrPfx, "PoTPowerErr"))
-	}
+	if adPowerPoT == nil { panic(err.Err(data.ErrPfx, "PoTPowerErr")) }
 
 	//   - add JwT Key
 	if adPowerPoT.JwT == 1 {
 		_ = properties.PropertyPoT.UsK("JwT", &jwt.JPoT)
-		if jwt.JPoT == nil {
-			panic(err.Err(data.ErrPfx, "PoTJwTErr"))
-		}
+		if jwt.JPoT == nil { panic(err.Err(data.ErrPfx, "PoTJwTErr")) }
 	}
 
 	// Initialized Adapter
-	if adPowerPoT.Adapter == 1 {
-		adapter.New().Made()
-	}
+	if adPowerPoT.Adapter == 1 { adapter.New() }
 
 	// Initialized Redis
-	if adPowerPoT.Redis == 1 {
-		redis.New().Made()
-	}
+	if adPowerPoT.Redis == 1 { redis.New() }
 }
 
 func ad() *autoload {

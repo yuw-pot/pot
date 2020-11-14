@@ -13,6 +13,7 @@ const (
 	// Err Message Keywords
 	ErrPfx string = PoT
 	PoTSuccessOK string = "SuccessOK"
+	PoTErrorNull string = "ErrDefault"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
 	eMsg *ErrH = &ErrH {
 		ErrPfx: {
 			PoTSuccessOK:		"Success",
-			"ErrDefault":		"Unknown Error",
+			PoTErrorNull:		"Unknown Error",
 
 			"PoTModeErr":		"Error PoT.Mode Parameters (0->debug|1->release) in the file of .("+EnvDEV+"|"+EnvSTG+"|"+EnvPRD+").yaml",
 			"PoTZapLogErr":		"Error Logs.PoT Parameters",
@@ -46,11 +47,13 @@ var (
 			"PropEnvExclude":	"Exclude Env Parameters",
 			"PropEnvFile":		"Missing Env File",
 
-			"AdapterSrc":		"Missing db Configure (Adapter.*)",
-			"AdapterMadeMode":	"Error Engine Mode",
-			"AdapterMadeDN":	"Error Engine Driver Name",
-			"AdapterMadeName":	"Error Engine db Name",
-			"AdapterEngineErr":	"Engine Connect Error",
+			"AdapterSrc":				"Missing db Configure (Adapter.*)",
+			"AdapterConfigErr":			"Error db Configure",
+			"AdapterMode":				"Error Engine Mode",
+			"AdapterModeDN":			"Error Engine Driver Name",
+			"AdapterModeName":			"Error Engine db Tag",
+			"AdapterEngineErr":			"Engine Connect Error",
+			"AdapterEngineGroupErr":	"Engine Group Connect Error",
 
 			"TokenParamsErr":	"Missing Token Parameters",
 			"TokenTypeErr":		"Error Token Type(MD5|SHA1|SHA256)",
@@ -70,6 +73,8 @@ var (
 			"JwTInfoType":		"JwT Info is not struct",
 			"JwTInfoEmpty":		"JwT Info is empty",
 			"JwTCacheResult":	"JwT Token & Encrypt is empty",
+
+			"CasbinEnforcer":	"Casbin Initialize Error",
 
 			"ComponentCacheClient":		"Missing Client",
 			"ComponentCacheSeTParams":	"Error SeT Parameters",

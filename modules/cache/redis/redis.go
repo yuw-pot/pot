@@ -16,7 +16,7 @@ import (
 )
 
 type (
-	rPoT struct {
+	redisPoT struct {
 		rd *redis.Client
 		mx *sync.Mutex
 		sParams *srcParams
@@ -30,9 +30,7 @@ type (
 	}
 )
 
-var (
-	adapterRedis map[string]*redis.Client
-)
+var adapterRedis map[string]*redis.Client
 
 func Made(d string) (*redis.Client, error) {
 	d = strings.ToLower(d)
@@ -45,13 +43,14 @@ func Made(d string) (*redis.Client, error) {
 	return adapterRedis[d], nil
 }
 
-func New() *rPoT {
-	return &rPoT {
-		mx: &sync.Mutex{},
-	}
+func New() *redisPoT {
+	client := &redisPoT{}
+	client.mx = &sync.Mutex{}
+	
+	return client.initialized()
 }
 
-func (r *rPoT) Made() {
+func (rd *redisPoT) initialized() *redisPoT {
 	redisPoT := properties.PropertyPoT.GeT("Redis", nil)
 	if redisPoT == nil {
 		panic(E.Err(data.ErrPfx, "RedParamsErr"))
@@ -59,51 +58,54 @@ func (r *rPoT) Made() {
 
 	adapterRedis = map[string]*redis.Client{}
 	for key, val := range redisPoT.(map[string]interface{}) {
-		r.sParams = &srcParams {
+		rd.sParams = &srcParams {
 			network:  "",
 			addr:     "",
 			password: "",
 			db:       0,
 		}
 
-		if _, ok := val.(map[string]interface{})["Network"]; ok {
-			r.sParams.network = cast.ToString(val.(map[string]interface{})["Network"])
+		var ok bool
+
+		network, ok := val.(map[string]interface{})["network"]
+		if ok {
+			rd.sParams.network = cast.ToString(network)
 		}
 
-		if _, ok := val.(map[string]interface{})["Addr"]; ok {
-			r.sParams.addr = cast.ToString(val.(map[string]interface{})["Addr"])
+		addr, ok := val.(map[string]interface{})["addr"]
+		if ok {
+			rd.sParams.addr = cast.ToString(addr)
 		}
 
-		if _, ok := val.(map[string]interface{})["Password"]; ok {
-			r.sParams.password = cast.ToString(val.(map[string]interface{})["Password"])
+		password, ok := val.(map[string]interface{})["password"]
+		if ok {
+			rd.sParams.password = cast.ToString(password)
 		}
 
-		if _, ok := val.(map[string]interface{})["DB"]; ok {
-			r.sParams.db = cast.ToInt(val.(map[string]interface{})["DB"])
+		db, ok := val.(map[string]interface{})["db"]
+		if ok {
+			rd.sParams.db = cast.ToInt(db)
 		}
 
-		adapterRedis[strings.ToLower(key)] = r.instance()
+		adapterRedis[strings.ToLower(key)] = rd.instance()
 	}
+
+	return rd
 }
 
-func (r *rPoT) instance() *redis.Client {
-	r.mx.Lock()
-
-	defer func() {
-		r.mx.Unlock()
-	}()
+func (rd *redisPoT) instance() *redis.Client {
+	rd.mx.Lock()
+	defer func() { rd.mx.Unlock() }()
 
 	client := redis.NewClient(&redis.Options{
-		Network: 	r.sParams.network,
-		Addr: 		r.sParams.addr,
-		Password: 	r.sParams.password,
-		DB: 		r.sParams.db,
+		Network: 	rd.sParams.network,
+		Addr: 		rd.sParams.addr,
+		Password: 	rd.sParams.password,
+		DB: 		rd.sParams.db,
 	})
 
 	_, err := client.Ping(context.Background()).Result()
-	if err != nil {
-		panic(err)
-	}
+	if err != nil { panic(err) }
 
 	return client
 }

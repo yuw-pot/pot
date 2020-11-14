@@ -5,56 +5,77 @@
 package models
 
 import (
-	"github.com/go-xorm/xorm"
 	"github.com/yuw-pot/pot/data"
+	"github.com/yuw-pot/pot/modules/adapter"
 	E "github.com/yuw-pot/pot/modules/err"
+	"github.com/yuw-pot/pot/modules/utils"
 	"strings"
+	"xorm.io/xorm"
 )
 
 type Models struct {
-	engine *xorm.Engine
+	v *utils.PoT
+	group map[interface{}][]*xorm.Engine
 }
 
-func New(engine *xorm.Engine) *Models {
+func New(group map[interface{}][]*xorm.Engine) *Models {
 	return &Models {
-		engine: engine,
+		v: utils.New(),
+		group: group,
 	}
 }
 
-func (m *Models) Engine() *xorm.Engine {
-	return m.engine
+func (m *Models) GeTEngine(method string) (*xorm.Engine, error) {
+	if ok := m.v.Contains(method, adapter.Master, adapter.Slaver); ok == false {
+		return nil, E.Err(data.ErrPfx, "AdapterModeName")
+	}
+
+	var adapterLength int = 0
+
+	switch method {
+	case adapter.Master:
+
+		adapterLength = len(m.group[adapter.Master])
+
+		_, ok := m.group[adapter.Master]
+		if ok == false || adapterLength != 1 {
+			return nil, E.Err(data.ErrPfx, "AdapterEngineGroupErr")
+		}
+
+		return m.group[adapter.Master][0], nil
+
+	case adapter.Slaver:
+
+		adapterLength = len(m.group[adapter.Slaver])
+
+		_, ok := m.group[adapter.Slaver]
+		if ok == false || adapterLength <= 0 {
+			return nil, E.Err(data.ErrPfx, "AdapterEngineGroupErr")
+		}
+
+		return m.group[adapter.Slaver][m.v.NumRandom(adapterLength)], nil
+
+	default:
+		return nil, E.Err(data.ErrPfx, "AdapterModeName")
+	}
 }
 
 func (m *Models) Insert(d interface{}) (i int64, err error) {
-	db := m.engine.NewSession()
+	conn, err := m.GeTEngine(adapter.Master)
+	if err != nil { return 0, err }
 
-	defer func() {
-		db.Close()
-	}()
+	db := conn.NewSession()
+	defer func() { db.Close() }()
 
 	return db.Insert(d)
 }
 
-func (m *Models) Total(d interface{}) (i int64, err error) {
-	db := m.engine.NewSession()
-
-	defer func() {
-		db.Close()
-	}()
-
-	return db.Count(d)
-}
-
 func (m *Models) Update(mPoT *data.ModPoT, d interface{}) (i int64, err error) {
-	if mPoT.Query == nil || mPoT.QueryArgs == nil {
-		return 0, E.Err(data.ErrPfx, "ModParamsErr")
-	}
+	conn, err := m.GeTEngine(adapter.Master)
+	if err != nil { return 0, err }
 
-	db := m.engine.NewSession()
-
-	defer func() {
-		db.Close()
-	}()
+	db := conn.NewSession()
+	defer func() { db.Close() }()
 
 	return db.Where(mPoT.Query, mPoT.QueryArgs ...).Update(d)
 }
@@ -64,21 +85,31 @@ func (m *Models) Delete(mPoT *data.ModPoT, d interface{}) (i int64, err error) {
 		return 0, E.Err(data.ErrPfx, "ModParamsErr")
 	}
 
-	db := m.engine.NewSession()
+	conn, err := m.GeTEngine(adapter.Master)
+	if err != nil { return 0, err }
 
-	defer func() {
-		db.Close()
-	}()
+	db := conn.NewSession()
+	defer func() { db.Close() }()
 
 	return db.Where(mPoT.Query, mPoT.QueryArgs ...).Delete(d)
 }
 
-func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) (bool, error) {
-	db := m.engine.NewSession()
+func (m *Models) Total(d interface{}) (i int64, err error) {
+	conn, err := m.GeTEngine(adapter.Slaver)
+	if err != nil { return 0, err }
 
-	defer func() {
-		db.Close()
-	}()
+	db := conn.NewSession()
+	defer func() { db.Close() }()
+
+	return db.Count(d)
+}
+
+func (m *Models) GeT(mPoT *data.ModPoT, d interface{}) (bool, error) {
+	conn, err := m.GeTEngine(adapter.Slaver)
+	if err != nil { return false, err }
+
+	db := conn.NewSession()
+	defer func() { db.Close() }()
 
 	if mPoT.Table != "" && mPoT.Field != nil {
 		if ok, _ := db.IsTableExist(mPoT.Table); ok == false {
