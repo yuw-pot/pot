@@ -5,24 +5,44 @@
 package languages
 
 import (
-	U "github.com/yuw-pot/pot/modules/utils"
+	"github.com/spf13/cast"
 	"golang.org/x/text/language"
-)
-
-var (
-	EN = language.English.String()
-	CN = language.English.String()
+	"golang.org/x/text/message"
 )
 
 type (
 	PoT struct {
-		vs *U.PoT
+		TranslatePoT *TranslatePoT
 	}
 )
 
-func New() *PoT {
-	return &PoT {
-		vs: U.New(),
-	}
+func Translate(key, ln string, replace ... interface{}) string {
+	return message.NewPrinter(language.MustParse(ln)).Sprintf(key, replace ...)
 }
+
+func New() *PoT {
+	return &PoT {}
+}
+
+func (ln *PoT) Initialized() *PoT {
+	if ln.TranslatePoT != nil {
+		for i, translated := range *ln.TranslatePoT {
+			if translated != nil {
+				for key, val := range translated {
+					(*translation)[i][key] = val
+				}
+			}
+		}
+	}
+
+	for i, translated := range *translation {
+		for key, val := range translated {
+			message.SetString(language.MustParse(i), key, cast.ToString(val))
+		}
+	}
+
+	return ln
+}
+
+
 

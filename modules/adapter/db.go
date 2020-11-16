@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 	"xorm.io/xorm"
+	"xorm.io/xorm/caches"
 )
 
 type (
@@ -67,15 +68,16 @@ func (db *odbc) instance() *odbc {
 		panic(err)
 	}
 
-	engine.SetMaxOpenConns(db.sParam.MaxOpen)
-	engine.SetMaxIdleConns(db.sParam.MaxIdle)
-	engine.SetConnMaxLifetime(time.Second)
+	engine.SetMaxOpenConns(db.sParam.MaxOpen) 	// 设置最大打开连接数
+	engine.SetMaxIdleConns(db.sParam.MaxIdle) 	// 设置连接池的空闲数大小
+	engine.SetConnMaxLifetime(time.Minute) 		// 设置连接的最大生存时间
 
 	engine.ShowSQL(db.sParam.ShowedSQL)
 	engine.SetTZDatabase(db.timeLocation)
 
 	if db.sParam.CachedSQL {
-		//engine.SetDefaultCacher()
+		cache := caches.NewLRUCacher(caches.NewMemoryStore(), 1000)
+		engine.SetDefaultCacher(cache)
 	}
 
 	db.engine = engine

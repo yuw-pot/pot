@@ -21,15 +21,11 @@ import (
 const char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 type (
-	PoT struct {
-
-	}
+	PoT struct {}
 )
 
 func New() *PoT {
-	return &PoT {
-
-	}
+	return &PoT {}
 }
 
 func (v *PoT) RandString(size int) string {
@@ -125,6 +121,18 @@ func (v *PoT) ToStruct(d interface{}, res interface{}) error {
 	if err != nil { return err }
 
 	return nil
+}
+
+func (v *PoT) ToMapInterface(d map[string]interface{}) map[interface{}]interface{} {
+	if d == nil { return nil }
+
+	var res map[interface{}]interface{} = map[interface{}]interface{}{}
+
+	for key, val := range d {
+		res[key] = val
+	}
+
+	return res
 }
 
 func (v *PoT) MergeH(d ... *data.H) *data.H {

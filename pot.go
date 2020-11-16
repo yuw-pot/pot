@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/err"
+	"github.com/yuw-pot/pot/modules/languages"
 	"github.com/yuw-pot/pot/modules/properties"
 	"github.com/yuw-pot/pot/modules/subscriber"
 	"github.com/yuw-pot/pot/modules/utils"
@@ -26,6 +27,7 @@ type (
 		PoTRoute *routes.PoT
 		PoTError *err.PoT
 		PoTSubscriber *subscriber.PoT
+		PoTTranslater *languages.PoT
 	}
 )
 
@@ -101,6 +103,13 @@ func (d *PoT) PoT() *PoT {
 	// Subscriber Initialize
 	if d.PoTSubscriber != nil {
 		subscriber.StarT(d.PoTSubscriber)
+	}
+
+	// Languages & Translation
+	if d.PoTTranslater != nil {
+		ln := languages.New()
+		ln.TranslatePoT = d.PoTTranslater.TranslatePoT
+		ln.Initialized()
 	}
 
 	return d

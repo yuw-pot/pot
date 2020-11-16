@@ -154,54 +154,28 @@ func (adapterPoT *PoT) initialized() *PoT {
 				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
 			}
 
-			adapterMaster[dn][label] = adapterPoT.validate(master.(map[string]interface{}))
-			if adapterMaster[dn][label] == nil {
+			masterTo := adapterPoT.v.ToMapInterface(master.(map[string]interface{}))
+			masterEngine := adapterPoT.validate(masterTo)
+			if len(masterEngine) != 1 {
 				content := fmt.Sprintf("Adapter.%v.Conns.%v.Master", dn, label)
 				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
 			}
 
+			adapterMaster[dn][label] = masterEngine[0]
+
 			adapterSlaver[dn][label] = make([]*xorm.Engine, len(slaver.([]interface{})))
-			adapterSlaver[dn][label] = adapterPoT.validateGroup(slaver.([]interface{}) ...)
+			adapterSlaver[dn][label] = adapterPoT.validate(slaver.([]interface{}) ...)
+			if len(adapterSlaver[dn][label]) == 0 {
+				content := fmt.Sprintf("Adapter.%v.Conns.%v.Slaver", dn, label)
+				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
+			}
 		}
 	}
 
 	return adapterPoT
 }
 
-func (adapterPoT *PoT) validate(d map[string]interface{}) *xorm.Engine {
-	adapterPoT.sConns = &srcConns {
-		Repo:     "",
-		Host:     "",
-		Port:     0,
-		Username: "",
-		Password: "",
-	}
-
-	repo, ok := d["repo"]
-	if ok == false { return nil }
-
-	host, ok := d["host"]
-	if ok == false { return nil }
-
-	port, ok := d["port"]
-	if ok == false { return nil }
-
-	username, ok := d["username"]
-	if ok == false { return nil }
-
-	password, ok := d["password"]
-	if ok == false { return nil }
-
-	adapterPoT.sConns.Repo = cast.ToString(repo)
-	adapterPoT.sConns.Host = cast.ToString(host)
-	adapterPoT.sConns.Port = cast.ToInt(port)
-	adapterPoT.sConns.Username = cast.ToString(username)
-	adapterPoT.sConns.Password = cast.ToString(password)
-
-	return adapterPoT.instance()
-}
-
-func (adapterPoT *PoT) validateGroup(d ... interface{}) []*xorm.Engine {
+func (adapterPoT *PoT) validate(d ... interface{}) []*xorm.Engine {
 	var adapters []*xorm.Engine = make([]*xorm.Engine, len(d))
 
 	for key, val := range d {
@@ -213,27 +187,27 @@ func (adapterPoT *PoT) validateGroup(d ... interface{}) []*xorm.Engine {
 			Password: "",
 		}
 		
-		repo, ok := val.(map[interface{}]interface{})["Repo"]
+		repo, ok := val.(map[interface{}]interface{})["repo"]
 		if ok == false {
 			continue
 		}
 
-		host, ok := val.(map[interface{}]interface{})["Host"]
+		host, ok := val.(map[interface{}]interface{})["host"]
 		if ok == false {
 			continue
 		}
 
-		port, ok := val.(map[interface{}]interface{})["Port"]
+		port, ok := val.(map[interface{}]interface{})["port"]
 		if ok == false {
 			continue
 		}
 
-		username, ok := val.(map[interface{}]interface{})["Username"]
+		username, ok := val.(map[interface{}]interface{})["username"]
 		if ok == false {
 			continue
 		}
 
-		password, ok := val.(map[interface{}]interface{})["Password"]
+		password, ok := val.(map[interface{}]interface{})["password"]
 		if ok == false {
 			continue
 		}

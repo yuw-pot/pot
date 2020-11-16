@@ -5,6 +5,7 @@
 package models
 
 import (
+	"database/sql"
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/adapter"
 	E "github.com/yuw-pot/pot/modules/err"
@@ -53,11 +54,50 @@ func (m *Models) GeTEngine(method string) (*xorm.Engine, error) {
 			return nil, E.Err(data.ErrPfx, "AdapterEngineGroupErr")
 		}
 
-		return m.group[adapter.Slaver][m.v.NumRandom(adapterLength)], nil
+		if adapterLength == 1 {
+			return m.group[adapter.Slaver][0], nil
+		} else {
+			return m.group[adapter.Slaver][m.v.NumRandom(adapterLength)], nil
+		}
 
 	default:
 		return nil, E.Err(data.ErrPfx, "AdapterModeName")
 	}
+}
+
+func (m *Models) Transaction(operation func(db *xorm.Session)) error {
+	conn, err := m.GeTEngine(adapter.Master)
+	if err != nil { return err  }
+
+	db := conn.NewSession()
+	defer func() { db.Close() }()
+
+	err = db.Begin()
+	if err != nil { return err }
+
+	operation(db)
+
+	err = db.Commit()
+	if err != nil {
+		_ = db.Rollback()
+		return err
+	}
+
+	return nil
+}
+
+func (m *Models) Exec(sqlOrArgs ...interface{}) (sql.Result, error) {
+	conn, err := m.GeTEngine(adapter.Master)
+	if err != nil { return nil, err }
+
+	return conn.Exec(sqlOrArgs ...)
+}
+
+func (m *Models) Query(sqlOrArgs ...interface{}) ([]map[string][]byte, error) {
+	conn, err := m.GeTEngine(adapter.Slaver)
+	if err != nil { return nil, err }
+
+	return conn.Query(sqlOrArgs ...)
 }
 
 func (m *Models) Insert(d interface{}) (i int64, err error) {
@@ -67,7 +107,10 @@ func (m *Models) Insert(d interface{}) (i int64, err error) {
 	db := conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Insert(d)
+	i, err = db.Insert(d)
+	//conn.ClearCache()
+
+	return
 }
 
 func (m *Models) Update(mPoT *data.ModPoT, d interface{}) (i int64, err error) {

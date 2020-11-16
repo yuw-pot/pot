@@ -119,19 +119,41 @@ Adapter:
       CachedSQL: false
 
     Conns:
-      db_repo_demo:
+      I:
         Master:
-          - Host: "127.0.0.1"
-            Port: 3306
-            Username: "root"
-            Password: "root"
-          - Host: "127.0.0.1"
+            Repo: "repo_demo"
+            Host: "127.0.0.1"
             Port: 3306
             Username: "root"
             Password: "root"
 
         Slaver:
-          - Host: "127.0.0.1"
+          - Repo: "repo_demo"
+            Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+          - Repo: "repo_demo_ii"
+            Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+	  II:
+        Master:
+            Repo: "repo_demo"
+            Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+
+        Slaver:
+          - Repo: "repo_demo"
+            Host: "127.0.0.1"
+            Port: 3306
+            Username: "root"
+            Password: "root"
+          - Repo: "repo_demo_ii"
+            Host: "127.0.0.1"
             Port: 3306
             Username: "root"
             Password: "root"
