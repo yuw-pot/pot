@@ -5,19 +5,40 @@
 package redis
 
 import (
-	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
 	E "github.com/yuw-pot/pot/modules/err"
-	"github.com/yuw-pot/pot/modules/properties"
 	"strings"
 	"sync"
+	"time"
+)
+
+const (
+	network string = "tcp"
+	addr string = "127.0.0.1:6379"
+)
+
+var (
+	_ adapter = &redisPoT{}
+	_ adapter = &redisClusterPoT{}
+
+	adapterRedis map[string]*redis.Client = map[string]*redis.Client{}
+	adapterRedisCluster map[string]*redis.ClusterClient = map[string]*redis.ClusterClient{}
 )
 
 type (
+	adapter interface {
+		initialized()
+	}
+
+	redisClusterPoT struct {
+		mx *sync.Mutex
+		addrs []string
+		username string
+		password string
+	}
+
 	redisPoT struct {
-		rd *redis.Client
 		mx *sync.Mutex
 		sParams *srcParams
 	}
@@ -25,87 +46,40 @@ type (
 	srcParams struct {
 		network		string
 		addr 		string
+		username	string
 		password 	string
 		db 			int
+		poolsize	int
+		pooltimeout	time.Duration
 	}
 )
 
-var adapterRedis map[string]*redis.Client
+func Initialized() {
+	if len(adapterRedis) == 0 {
+		var singletonClient adapter = newSingleton()
+		singletonClient.initialized()
+	}
 
-func Made(d string) (*redis.Client, error) {
-	d = strings.ToLower(d)
+	if len(adapterRedisCluster) == 0 {
+		var clusterClient adapter = newCluster()
+		clusterClient.initialized()
+	}
+}
 
-	_, ok := adapterRedis[d]
+func Adapter(d string) (*redis.Client, error) {
+	c, ok := adapterRedis[strings.ToLower(d)]
 	if ok == false {
-		return nil, E.Err(data.ErrPfx, "")
+		return nil, E.Err(data.ErrPfx, "RedEngineErr")
 	}
 
-	return adapterRedis[d], nil
+	return c, nil
 }
 
-func New() *redisPoT {
-	client := &redisPoT{}
-	client.mx = &sync.Mutex{}
-	
-	return client.initialized()
-}
-
-func (rd *redisPoT) initialized() *redisPoT {
-	redisPoT := properties.PropertyPoT.GeT("Redis", nil)
-	if redisPoT == nil {
-		panic(E.Err(data.ErrPfx, "RedParamsErr"))
+func AdapterCluster(d string) (*redis.ClusterClient, error) {
+	c, ok := adapterRedisCluster[strings.ToLower(d)]
+	if ok == false {
+		return nil, E.Err(data.ErrPfx, "RedEngineErr")
 	}
 
-	adapterRedis = map[string]*redis.Client{}
-	for key, val := range redisPoT.(map[string]interface{}) {
-		rd.sParams = &srcParams {
-			network:  "",
-			addr:     "",
-			password: "",
-			db:       0,
-		}
-
-		var ok bool
-
-		network, ok := val.(map[string]interface{})["network"]
-		if ok {
-			rd.sParams.network = cast.ToString(network)
-		}
-
-		addr, ok := val.(map[string]interface{})["addr"]
-		if ok {
-			rd.sParams.addr = cast.ToString(addr)
-		}
-
-		password, ok := val.(map[string]interface{})["password"]
-		if ok {
-			rd.sParams.password = cast.ToString(password)
-		}
-
-		db, ok := val.(map[string]interface{})["db"]
-		if ok {
-			rd.sParams.db = cast.ToInt(db)
-		}
-
-		adapterRedis[strings.ToLower(key)] = rd.instance()
-	}
-
-	return rd
-}
-
-func (rd *redisPoT) instance() *redis.Client {
-	rd.mx.Lock()
-	defer func() { rd.mx.Unlock() }()
-
-	client := redis.NewClient(&redis.Options{
-		Network: 	rd.sParams.network,
-		Addr: 		rd.sParams.addr,
-		Password: 	rd.sParams.password,
-		DB: 		rd.sParams.db,
-	})
-
-	_, err := client.Ping(context.Background()).Result()
-	if err != nil { panic(err) }
-
-	return client
+	return c, nil
 }

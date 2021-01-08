@@ -4,63 +4,59 @@
 
 package subscriber
 
-import (
-	"github.com/spf13/cast"
-)
-
-func StarT(subscriberPoT *PoT) {
+func Start(subscriberPoT *PoT) {
 	if subscriberPoT.KeYs == nil || subscriberPoT.Pool == nil || subscriberPoT.Channels == nil {
 		return
 	}
 
-	keys = subscriberPoT.KeYs
-	pool = subscriberPoT.Pool
-	channels = subscriberPoT.Channels
+	sub := new(subscribed)
+	sub.info = subscriberPoT
 
-	go new(subscribed).do()
+	go sub.do()
 }
 
 const (
 	MethodRdS string = "rds"
-	MethodKfK string = "kfk"
+	MethodKfK string = "kafka"
 )
 
 type (
 	subscriber interface {
-		setPool(pool *Pool)
-		sub(channels ... string)
+		setInfo(info *PoT)
+		sub()
 	}
 
 	KeYs []interface{}
-	Pool []interface{}
-	Channels map[string][]Provider
+	Pool struct {
+		Method 	string
+		Config 	interface{}
+	}
+	Channels map[interface{}][]Provider
 
 	PoT struct {
 		KeYs *KeYs
-		Channels *Channels
 		Pool *Pool
+		Channels *Channels
 	}
 
-	subscribed struct {}
+	subscribed struct {
+		info *PoT
+	}
 )
 
 var (
 	_ subscriber = new(rds)
 	_ subscriber = new(kfk)
-
-	keys *KeYs
-	pool *Pool
-	channels *Channels
 )
 
 func (sub *subscribed) do() {
-	if len(*pool) <= 1 {
+	if sub.info.Pool.Method != MethodRdS && sub.info.Pool.Method != MethodKfK {
 		return
 	}
 
 	var client subscriber
 
-	switch (*pool)[0] {
+	switch sub.info.Pool.Method {
 	case MethodRdS:
 
 		client = new(rds)
@@ -75,11 +71,6 @@ func (sub *subscribed) do() {
 		return
 	}
 
-	keYsToStrSlice := make([]string, len(*keys))
-	for i, val := range *keys {
-		keYsToStrSlice[i] = cast.ToString(val)
-	}
-
-	client.setPool(pool)
-	client.sub(keYsToStrSlice ...)
+	client.setInfo(sub.info)
+	client.sub()
 }

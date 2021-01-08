@@ -12,29 +12,28 @@ import (
 	cache "github.com/yuw-pot/pot/modules/cache/redis"
 	"github.com/yuw-pot/pot/modules/crypto"
 	E "github.com/yuw-pot/pot/modules/err"
-	"github.com/yuw-pot/pot/modules/utils"
 	"strings"
 	"time"
 )
 
-type (
-	RedisComponent struct {
-		pfx string
-		ctx context.Context
-		v *utils.PoT
-		client *redis.Client
-	}
-)
+type RedisComponent struct {
+	pfx string
+	ctx context.Context
+	client *redis.Client
+}
 
 func NewRedis(d string) *RedisComponent {
 	r := &RedisComponent {
 		pfx: "",
 		ctx: context.Background(),
-		v: utils.New(),
 	}
 
-	r.client, _ = cache.Made(d)
+	r.client, _ = cache.Adapter(d)
 	return r
+}
+
+func (r *RedisComponent) GeTClient() *redis.Client {
+	return r.client
 }
 
 func (r *RedisComponent) KeYs(d ... interface{}) (interface{}, error) {
@@ -88,7 +87,7 @@ func (r *RedisComponent) IsExisT(d interface{}) (bool, error) {
 	return true, nil
 }
 
-func (r *RedisComponent) HSeT(key interface{}, d map[string]interface{}) (interface{}, error)  {
+func (r *RedisComponent) HSeT(key interface{}, d map[string]interface{}) (interface{}, error) {
 	if err := r.check(); err != nil {
 		return nil, err
 	}
@@ -121,29 +120,25 @@ func (r *RedisComponent) Publish(channel string, message interface{}) (interface
 	return r.client.Publish(r.ctx, channel, message).Result()
 }
 
-func (r *RedisComponent) SeTPrefix(pfx string) *RedisComponent {
-	if pfx == "" {
-		return r
-	}
+func (r *RedisComponent) SeTPrefix(pfx string) error {
+	if pfx == "" { return E.Err(data.ErrPfx, data.PoTErrorNull) }
 
 	cryptoMd := crypto.New()
 	cryptoMd.Mode = data.ModeToken
 	cryptoMd.D = []interface{}{data.MD5, pfx}
 
 	cryptoEn, err := cryptoMd.Made()
-	if err != nil {
-		return r
-	}
+	if err != nil { return err }
 
 	r.pfx = cast.ToString(cryptoEn)
-	return r
+	return nil
 }
 
 func (r *RedisComponent) KeYFormaT(key string) string {
 	return r.addPrefix(key)
 }
 
-func (r *RedisComponent) Cache() *RedisComponent {
+func (r *RedisComponent) Cache() interface{} {
 	return r
 }
 
@@ -151,27 +146,17 @@ func (r *RedisComponent) GeTPrefix() string {
 	return r.pfx
 }
 
-func (r *RedisComponent) GeTClienT() *redis.Client {
-	return r.client
-}
-
 func (r *RedisComponent) GeTx() context.Context {
 	return r.ctx
 }
 
 func (r *RedisComponent) addPrefix(key string) string {
-	if r.pfx == "" {
-		return key
-	}
-
+	if r.pfx == "" { return key }
 	return strings.Join([]string{r.pfx, key}, "_")
 }
 
 func (r *RedisComponent) check() error {
-	if r.client == nil {
-		return E.Err(data.ErrPfx, "ComponentCacheClient")
-	}
-
+	if r.client == nil { return E.Err(data.ErrPfx, "ComponentCacheClient") }
 	return nil
 }
 

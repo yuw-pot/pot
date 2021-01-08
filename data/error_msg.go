@@ -28,6 +28,7 @@ var (
 			"PoTSslCF":			"Missing SSL Cert File",
 			"PoTSslKF":			"Missing SSL Key File",
 			"PoTJwTErr":		"Missing JwT Parameters",
+			"PoTRouteErr":		"Missing Route Configuration",
 
 			"ModParamsErr":		"Error Model Parameter",
 			"ModDBTable":		"Error db Table",
@@ -47,14 +48,6 @@ var (
 			"PropEnvExclude":	"Exclude Env Parameters",
 			"PropEnvFile":		"Missing Env File",
 
-			"AdapterSrc":				"Missing db Configure (Adapter.*)",
-			"AdapterConfigErr":			"Error db Configure",
-			"AdapterMode":				"Error Engine Mode",
-			"AdapterModeDN":			"Error Engine Driver Name",
-			"AdapterModeName":			"Error Engine db Tag",
-			"AdapterEngineErr":			"Engine Connect Error",
-			"AdapterEngineGroupErr":	"Engine Group Connect Error",
-
 			"TokenParamsErr":	"Missing Token Parameters",
 			"TokenTypeErr":		"Error Token Type(MD5|SHA1|SHA256)",
 
@@ -65,6 +58,8 @@ var (
 
 			"CryptoParamsErr":	"Params Empty",
 			"CryptoAeSKeYErr":	"AES KeY Type Error",
+			"CryptoRsAPubKeY":	"Missing RsA Public KeY",
+			"CryptoRsAPriKeY":	"Missing RsA Private KeY",
 
 			"JwTKeYErr":		"Err Key",
 			"JwTKeYEmpty":		"Empty Key",
@@ -74,10 +69,27 @@ var (
 			"JwTInfoEmpty":		"JwT Info is empty",
 			"JwTCacheResult":	"JwT Token & Encrypt is empty",
 
+			"FilePathExist":	"File Path Exist",
+
 			"CasbinEnforcer":	"Casbin Initialize Error",
 
-			"ComponentCacheClient":		"Missing Client",
-			"ComponentCacheSeTParams":	"Error SeT Parameters",
+			"ComponentCacheClient":			"Missing Client",
+			"ComponentCacheSeTParams":		"Error SeT Parameters",
+			"ComponentCasbinParamMod":		"Error Param Casbin Mod",
+			"ComponentCasbinParamAdapter":	"Error Param Casbin Adapter",
+
+			"ComponentRequestMethod":	"Error Request Method",
+			"ComponentRequestURL":		"Empty Request URL",
+
+			"ComponentSubscribeKeY": 	"Configure Subscribe KeY Empty",
+
+			"AdapterSrc":				"Missing db Configure (Adapter.*)",
+			"AdapterConfigErr":			"Error db Configure",
+			"AdapterMode":				"Error Engine Mode",
+			"AdapterModeDN":			"Error Engine Driver Name",
+			"AdapterModeName":			"Error Engine db Tag",
+			"AdapterEngineErr":			"Engine Connect Error",
+			"AdapterEngineGroupErr":	"Engine Group Connect Error",
 		},
 	}
 )

@@ -19,7 +19,7 @@ type (
 	PoT struct {
 		Prop *viper.Viper
 
-		v *utils.PoT
+		u *utils.PoT
 		fs *files.PoT
 	}
 )
@@ -28,7 +28,7 @@ func New() *PoT {
 	return &PoT {
 		Prop: viper.New(),
 
-		v: utils.New(),
+		u: utils.New(),
 		fs: files.New(),
 	}
 }
@@ -42,7 +42,7 @@ func (cfg *PoT) Load() *PoT {
 		panic(E.Err(data.ErrPfx, "PropEnvEmpty"))
 	}
 
-	if ok := cfg.v.Contains(env, data.PropertySfxs ...); ok == false {
+	if ok := cfg.u.Contains(env, data.PropertySfxs ...); ok == false {
 		panic(E.Err(data.ErrPfx, "PropEnvExclude"))
 	}
 
@@ -88,7 +88,7 @@ func (cfg *PoT) UsK(key string, val interface{}, opts ...viper.DecoderConfigOpti
 }
 
 func (cfg *PoT) tpl() string {
-	return cfg.v.Sprintf(`## %v ##
+	return cfg.u.Sprintf(`## %v ##
 PoT:
   Name: "%v"
   Port: "%v"
@@ -100,15 +100,11 @@ PoT:
     CertFile: ""
     KeysFile: ""
 
-Power:
-  JwT: %d
-  Adapter: %d
-  Redis: %d
-
 JwT:
   Key: %v ## Edit for Security ##
-  Expire: %d
-  Mode: %v
+
+AeS:
+  KeY: "77^y8y*eu#AES"
 
 Adapter:
   Mysql:
@@ -171,13 +167,13 @@ Redis:
     DB: 1
 
 RedisCluster:
-  Network: "tcp"
-  Password: ""
-  DB: 0
-  AddrCluster:
-    - "127.0.0.1:6397"
-    - "127.0.0.1:6397"
-    - "127.0.0.1:6397"
+#  I:
+#    username: ""
+#    password: ""
+#    addrs:
+#      - "127.0.0.1:6379"
+#      - "127.0.0.1:6379"
+#      - "127.0.0.1:6379"
 
 Logs:
   PoT:
@@ -204,14 +200,8 @@ data.PropertyPort,
 data.PropertyMode,
 data.PropertyTimeLocation,
 data.PropertyHsslPower,
-// - PoT Power
-data.PropertyJwT,
-data.PropertyAdapter,
-data.PropertyRedis,
 // - JwT Key
 data.JwTKeY,
-data.JwTExpire,
-data.JwTMethod,
 // - Log
 data.LogFileName,
 data.LogFormatConsole,

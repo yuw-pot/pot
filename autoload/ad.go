@@ -10,7 +10,6 @@ import (
 	"github.com/yuw-pot/pot/modules/adapter"
 	"github.com/yuw-pot/pot/modules/cache/redis"
 	"github.com/yuw-pot/pot/modules/err"
-	"github.com/yuw-pot/pot/modules/jwt"
 	"github.com/yuw-pot/pot/modules/properties"
 )
 
@@ -23,25 +22,12 @@ func init() {
 
 	// Initialized Properties
 	//   - assign the properties.PropertyPoT
+	//   - Adapter
+	//   - Redis
+
 	ad.property()
-
-	if properties.PropertyPoT == nil { panic(err.Err(data.ErrPfx, "AdPropVar")) }
-
-	var adPowerPoT *data.PowerPoT
-	_ = properties.PropertyPoT.UsK("Power", &adPowerPoT)
-	if adPowerPoT == nil { panic(err.Err(data.ErrPfx, "PoTPowerErr")) }
-
-	//   - add JwT Key
-	if adPowerPoT.JwT == 1 {
-		_ = properties.PropertyPoT.UsK("JwT", &jwt.JPoT)
-		if jwt.JPoT == nil { panic(err.Err(data.ErrPfx, "PoTJwTErr")) }
-	}
-
-	// Initialized Adapter
-	if adPowerPoT.Adapter == 1 { adapter.New() }
-
-	// Initialized Redis
-	if adPowerPoT.Redis == 1 { redis.New() }
+	ad.adapter()
+	ad.cache()
 }
 
 func ad() *autoload {
@@ -59,4 +45,12 @@ func (ad *autoload) property() {
 	}
 
 	properties.PropertyPoT = ad.prop.Load()
+
+	if properties.PropertyPoT == nil {
+		panic(err.Err(data.ErrPfx, "AdPropVar"))
+	}
 }
+
+func (ad *autoload) adapter() { adapter.Initialized() }
+
+func (ad *autoload) cache() { redis.Initialized() }

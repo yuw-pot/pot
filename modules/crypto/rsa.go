@@ -8,30 +8,116 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
-	F "github.com/yuw-pot/pot/modules/files"
+	"github.com/spf13/cast"
+	"github.com/yuw-pot/pot/data"
+	E "github.com/yuw-pot/pot/modules/err"
+	"github.com/yuw-pot/pot/modules/files"
+)
+
+const (
+	defaultPath string = "./resources/pem/"
+	defaultPriKeYName string = "privateKeY.pem"
+	defaultPubKeYName string = "publicKeY.pem"
 )
 
 type (
 	RsAPoT struct {
+		pubKeY string
+		priKeY string
 
+		f *files.PoT
 	}
 )
 
 func newRsA() *RsAPoT {
 	return &RsAPoT {
-
+		f: files.New(),
 	}
 }
 
-func (rsa *RsAPoT) made(d ... interface{}) (interface{}, error) {
-	return rsa, nil
+func (rsaPoT *RsAPoT) made(d ... interface{}) (interface{}, error) {
+	if len(d) > 3 {
+		return nil, E.Err(data.ErrPfx, "CryptoParamsErr")
+	}
+
+	var (
+		dirPath string = ""
+		rsaPath string = defaultPath
+	)
+
+	if len(d) == 3 {
+		dirPath = cast.ToString(d[2])
+		if dirPath != "" {
+			rsaPath = dirPath
+		}
+	}
+
+	// d ... interface{} | d[0]:Public KeY, d[1]:Private KeY
+	rsaPoT.pubKeY = rsaPath + cast.ToString(d[0])
+	rsaPoT.priKeY = rsaPath + cast.ToString(d[1])
+
+	return rsaPoT, nil
 }
 
-func (rsa *RsAPoT) T() string {
-	return "success T RsA!"
+// encrypt by using Public Key
+func (rsaPoT *RsAPoT) EncrypT(d string) (interface{}, error) {
+	if rsaPoT.pubKeY == "" {
+		return nil, E.Err(data.ErrPfx, "CryptoRsAPubKeY")
+	}
+
+	b, err := rsaPoT.getInfo(rsaPoT.pubKeY)
+	if err != nil { return nil, err }
+
+	pubKeY, err := x509.ParsePKIXPublicKey(b.Bytes)
+	if err != nil { return nil, err }
+
+	cipherTxT, err := rsa.EncryptPKCS1v15(rand.Reader, pubKeY.(*rsa.PublicKey), []byte(d))
+	if err != nil { return nil, err }
+
+	return base64.StdEncoding.EncodeToString(cipherTxT), nil
 }
 
+// decrypt by using private Key
+func (rsaPoT *RsAPoT) DecrypT(cipherTxT interface{}) (interface{}, error) {
+	if rsaPoT.priKeY == "" {
+		return nil, E.Err(data.ErrPfx, "CryptoRsAPriKeY")
+	}
+
+	byteCipherTxT, err := base64.StdEncoding.DecodeString(cast.ToString(cipherTxT))
+	if err != nil { return nil, err }
+
+	b, err := rsaPoT.getInfo(rsaPoT.priKeY)
+	if err != nil { return nil, err }
+
+	priKeY, err := x509.ParsePKCS1PrivateKey(b.Bytes)
+	if err != nil { return nil, err }
+
+	d, err := rsa.DecryptPKCS1v15(rand.Reader, priKeY, byteCipherTxT)
+	if err != nil { return nil, err }
+
+	return cast.ToString(d), err
+}
+
+func (rsaPoT *RsAPoT) getInfo(keyPath string) (*pem.Block, error) {
+	var err error
+
+	fp, err := rsaPoT.f.Open(keyPath)
+	if err != nil { return nil, err }
+
+	defer fp.Close()
+
+	key, err := fp.Stat()
+	if err != nil { return nil, err }
+
+	buf := make([]byte, key.Size())
+	_, err = fp.Read(buf)
+	if err != nil { return nil, err }
+
+	block, _ := pem.Decode(buf)
+	return block, nil
+}
 
 /**
  * Todo: Make PublicKey & PrivateKey
@@ -39,25 +125,30 @@ func (rsa *RsAPoT) T() string {
  *   - Private Key File
  *   - Public Key File
 **/
-func RsA(bits int, filePrivateKey string, filePublicKey string) {
+func RsA(bits int) {
 	var (
 		err error
-		fs *F.PoT = F.New()
+		fs *files.PoT = files.New()
 	)
 
 	// Make Private Key
-	priKey, err := rsa.GenerateKey(rand.Reader, bits)
+	priKeY, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		panic(err)
 	}
 
-	derStream := x509.MarshalPKCS1PrivateKey(priKey)
+	derStream := x509.MarshalPKCS1PrivateKey(priKeY)
 	block := &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: derStream,
 	}
 
-	priFile, errPriKey := fs.Create(filePrivateKey)
+	err = fs.MkdirAll(defaultPath)
+	if err != nil {
+		panic(err)
+	}
+
+	priFile, errPriKey := fs.Create(defaultPath + defaultPriKeYName)
 	if errPriKey != nil {
 		panic(errPriKey)
 	}
@@ -71,8 +162,9 @@ func RsA(bits int, filePrivateKey string, filePublicKey string) {
 	}
 
 	// Make Public Key
-	pubKey := &priKey.PublicKey
-	derPkix, err := x509.MarshalPKIXPublicKey(pubKey)
+	pubKeY := &priKeY.PublicKey
+	derPkix, err := x509.MarshalPKIXPublicKey(pubKeY)
+
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +174,12 @@ func RsA(bits int, filePrivateKey string, filePublicKey string) {
 		Bytes: derPkix,
 	}
 
-	pubFile, errPubKey := fs.Create(filePublicKey)
+	err = fs.MkdirAll(defaultPath)
+	if err != nil {
+		panic(err)
+	}
+
+	pubFile, errPubKey := fs.Create(defaultPath + defaultPubKeYName)
 	if errPubKey != nil {
 		panic(errPubKey)
 	}

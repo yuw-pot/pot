@@ -4,19 +4,15 @@
 
 package data
 
-import (
-	"time"
-)
-
 const (
-	// Time Location
+	// location zone
 	TimeLocation	string = "Asia/Shanghai"
+
+	// time
 	TimeHour	string = "HOUR"
 	TimeMinute	string = "MINUTE"
 	TimeSecond	string = "SECOND"
 
-	// Crypto
+	// crypto
 	JwTKeY		string = "PoT*!^YwY#JwT"
-	JwTExpire	time.Duration = 1
-	JwTMethod	string = TimeHour
 )

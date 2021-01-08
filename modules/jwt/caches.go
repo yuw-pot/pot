@@ -45,19 +45,19 @@ type (
 		// Components.Client
 		client *redis.Client
 		// Module.Utils
-		v *utils.PoT
+		u *utils.PoT
 	}
 )
 
 func NewJCacheAuth(client *redis.Client) *JCachePoT {
 	return &JCachePoT {
 		client: client,
-		v: utils.New(),
+		u: utils.New(),
 
 		KeY: "",
 		Info: nil,
 		Method: data.TimeHour,
-		Expire: data.JwTExpire,
+		Expire: 1,
 	}
 }
 
@@ -111,7 +111,7 @@ func (j *JCachePoT) Parse(accessToken interface{}, toStruct interface{}, refresh
 	aesDecrypt, err := aes.(*crypto.AeSPoT).DecrypT(aesEncrypt)
 	if err != nil { return nil, err }
 
-	err = j.v.ToStruct(aesDecrypt, toStruct)
+	err = j.u.ToStruct(aesDecrypt, toStruct)
 	if err != nil { return nil, err }
 
 	newAccessToken, err := j.refresh(accessToken, aesEncrypt, refresh ...)
@@ -152,7 +152,7 @@ func (j *JCachePoT) accessTokenEdit(accessToken, aesEncrypt interface{}) (interf
 	aesDecrypt, err := aes.(*crypto.AeSPoT).DecrypT(aesEncrypt)
 	if err != nil { return nil, err }
 
-	strRand := j.v.RandString(accessKeYRandString)
+	strRand := j.u.RandString(accessKeYRandString)
 	accessKeY := strings.Join([]string {
 		j.KeY, cast.ToString(aesDecrypt), strRand,
 	}, accessKeYSeperate)
@@ -181,10 +181,10 @@ func (j *JCachePoT) IsAccessTokenExisT(accessToken interface{}) bool {
 }
 
 func (j *JCachePoT) getAccessToken() (interface{}, interface{}, error) {
-	strInfo, err := j.v.ToJson(j.Info)
+	strInfo, err := j.u.ToJson(j.Info)
 	if err != nil { return nil, nil, err }
 
-	strRand := j.v.RandString(accessKeYRandString)
+	strRand := j.u.RandString(accessKeYRandString)
 	accessKeY := strings.Join([]string {
 		j.KeY, cast.ToString(strInfo), strRand,
 	}, accessKeYSeperate)
@@ -211,37 +211,37 @@ func (j *JCachePoT) setAccessToken(accessToken, aesEncrypt interface{}) error {
 }
 
 func (j *JCachePoT) check(d ... interface{}) (bool, error) {
-	if ok := j.v.Contains(errCheckClient, d ...); ok {
+	if ok := j.u.Contains(errCheckClient, d ...); ok {
 		if j.client == nil {
 			return false, E.Err(data.ErrPfx, "JwTCacheErr")
 		}
 	}
 
-	if ok := j.v.Contains(errCheckKeY, d ...); ok {
+	if ok := j.u.Contains(errCheckKeY, d ...); ok {
 		if j.KeY == "" {
 			return false, E.Err(data.ErrPfx, "JwTKeYEmpty")
 		}
 	}
 
-	if ok := j.v.Contains(errCheckMethod, d ...); ok {
-		if ok := j.v.Contains(j.Method, data.TimeHour, data.TimeMinute, data.TimeSecond); ok == false {
+	if ok := j.u.Contains(errCheckMethod, d ...); ok {
+		if ok := j.u.Contains(j.Method, data.TimeHour, data.TimeMinute, data.TimeSecond); ok == false {
 			return false, E.Err(data.ErrPfx, "JwTKeYErr")
 		}
 	}
 
-	if ok := j.v.Contains(errCheckExpire, d ...); ok {
+	if ok := j.u.Contains(errCheckExpire, d ...); ok {
 		if j.Expire <= 0 {
 			return false, E.Err(data.ErrPfx, "JwTExpireErr")
 		}
 	}
 
-	if ok := j.v.Contains(errCheckInfoEmpty, d ...); ok {
+	if ok := j.u.Contains(errCheckInfoEmpty, d ...); ok {
 		if j.Info == nil {
 			return false, E.Err(data.ErrPfx, "JwTInfoEmpty")
 		}
 	}
 
-	if ok := j.v.Contains(errCheckInfoType, d ...); ok {
+	if ok := j.u.Contains(errCheckInfoType, d ...); ok {
 		if reflect.TypeOf(j.Info).Kind() != reflect.Ptr {
 			return false, E.Err(data.ErrPfx, "JwTInfoType")
 		}

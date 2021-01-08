@@ -53,8 +53,8 @@ func (aes *AeSPoT) EncrypT(d interface{}) (interface{}, error) {
 	return base64.StdEncoding.EncodeToString(enCode), nil
 }
 
-func (aes *AeSPoT) DecrypT(enCode interface{}) (interface{}, error) {
-	deCode, err := base64.StdEncoding.DecodeString(cast.ToString(enCode))
+func (aes *AeSPoT) DecrypT(cipherTxT interface{}) (interface{}, error) {
+	deCode, err := base64.StdEncoding.DecodeString(cast.ToString(cipherTxT))
 	if err != nil {
 		return nil, err
 	}

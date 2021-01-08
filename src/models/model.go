@@ -15,19 +15,19 @@ import (
 )
 
 type Models struct {
-	v *utils.PoT
+	u *utils.PoT
 	group map[interface{}][]*xorm.Engine
 }
 
 func New(group map[interface{}][]*xorm.Engine) *Models {
 	return &Models {
-		v: utils.New(),
+		u: utils.New(),
 		group: group,
 	}
 }
 
 func (m *Models) GeTEngine(method string) (*xorm.Engine, error) {
-	if ok := m.v.Contains(method, adapter.Master, adapter.Slaver); ok == false {
+	if ok := m.u.Contains(method, adapter.Master, adapter.Slaver); ok == false {
 		return nil, E.Err(data.ErrPfx, "AdapterModeName")
 	}
 
@@ -57,7 +57,7 @@ func (m *Models) GeTEngine(method string) (*xorm.Engine, error) {
 		if adapterLength == 1 {
 			return m.group[adapter.Slaver][0], nil
 		} else {
-			return m.group[adapter.Slaver][m.v.NumRandom(adapterLength)], nil
+			return m.group[adapter.Slaver][m.u.NumRandom(adapterLength)], nil
 		}
 
 	default:

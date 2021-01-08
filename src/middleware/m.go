@@ -9,11 +9,11 @@ import (
 )
 
 type M struct {
-	v *utils.PoT
+	u *utils.PoT
 }
 
 func New() *M {
 	return &M {
-		v: utils.New(),
+		u: utils.New(),
 	}
 }

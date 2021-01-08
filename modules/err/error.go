@@ -11,15 +11,13 @@ import (
 	"runtime"
 )
 
-var EPoT *PoT = new(PoT)
-
 type (
 	PoT struct {
 		ErrMsg *data.ErrH
 	}
 )
 
-func (err *PoT) ErrPoTCombine() {
+func (err *PoT) Initialized() {
 	data.SeTErrMsg(err.ErrMsg)
 }
 

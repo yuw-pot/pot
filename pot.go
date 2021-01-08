@@ -20,25 +20,23 @@ import (
 
 const version string = "v1.0.0"
 
-type (
-	PoT struct {
-		vPoT *utils.PoT
+type PoT struct {
+	u *utils.PoT
 
-		PoTRoute *routes.PoT
-		PoTError *err.PoT
-		PoTSubscriber *subscriber.PoT
-		PoTTranslater *languages.PoT
-	}
-)
+	PoTRoute *routes.PoT
+	PoTError *err.PoT
+	PoTSubscribers []*subscriber.PoT
+	PoTTranslater *languages.PoT
+}
 
 func New() *PoT {
 	return &PoT {
-		vPoT: utils.New(),
+		u: utils.New(),
 	}
 }
 
 func (d *PoT) Run() {
-	d.vPoT.Fprintf(gin.DefaultWriter, "[%v] %v\n", data.PoT, version)
+	d.u.Fprintf(gin.DefaultWriter, "[%v] %v\n", data.PoT, version)
 
 	// Disable Console Color
 	gin.DisableConsoleColor()
@@ -49,7 +47,7 @@ func (d *PoT) Run() {
 	r := gin.New()
 
 	PoTMode := properties.PropertyPoT.GeT("PoT.Mode", "1")
-	if d.vPoT.Contains(PoTMode, 0,1) == false {
+	if d.u.Contains(PoTMode, 0,1) == false {
 		PoTMode = 1
 	}
 
@@ -76,13 +74,13 @@ func (d *PoT) Run() {
 			panic(err.Err(data.ErrPfx, "PoTSslKF"))
 		}
 
-		d.vPoT.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTPs on %v\n", data.PoT, strPoTPort)
+		d.u.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTPs on %v\n", data.PoT, strPoTPort)
 
 		//   - Run Https Server (SSL)
 		rErr = r.RunTLS(strPoTPort, PoTHsslCertFile, PoTHsslKeysFile)
 
 	} else {
-		d.vPoT.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTP on %v\n", data.PoT, strPoTPort)
+		d.u.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTP on %v\n", data.PoT, strPoTPort)
 
 		//   - Run Http Server
 		rErr = r.Run(strPoTPort)
@@ -93,21 +91,30 @@ func (d *PoT) Run() {
 
 func (d *PoT) PoT() *PoT {
 	// Routes Initialized
-	routes.RPoT = d.PoTRoute
+	if d.PoTRoute == nil {
+		panic(err.Err(data.ErrPfx, "PoTRouteErr"))
+	} else {
+		routes.RPoT = d.PoTRoute
+	}
 
 	// Err Modules Initialize
 	//   - Combine Error Message of Self Define
-	err.EPoT = d.PoTError
-	err.EPoT.ErrPoTCombine()
+	if d.PoTError != nil {
+		ep := new(err.PoT)
+		ep.ErrMsg = d.PoTError.ErrMsg
+		ep.Initialized()
+	}
 
 	// Subscriber Initialize
-	if d.PoTSubscriber != nil {
-		subscriber.StarT(d.PoTSubscriber)
+	if d.PoTSubscribers != nil {
+		for _, subscribe := range d.PoTSubscribers {
+			subscriber.Start(subscribe)
+		}
 	}
 
 	// Languages & Translation
 	if d.PoTTranslater != nil {
-		ln := languages.New()
+		ln := new(languages.PoT)
 		ln.TranslatePoT = d.PoTTranslater.TranslatePoT
 		ln.Initialized()
 	}

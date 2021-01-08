@@ -28,7 +28,7 @@ func New() *PoT {
 	return &PoT {}
 }
 
-func (v *PoT) RandString(size int) string {
+func (u *PoT) RandString(size int) string {
 	rand.NewSource(time.Now().UnixNano())
 
 	var res bytes.Buffer
@@ -39,7 +39,7 @@ func (v *PoT) RandString(size int) string {
 	return res.String()
 }
 
-func (v *PoT) IsInT(d interface{}) bool {
+func (u *PoT) IsInT(d interface{}) bool {
 	if reflect.ValueOf(d).Kind() == reflect.Int {
 		return true
 	}
@@ -47,7 +47,7 @@ func (v *PoT) IsInT(d interface{}) bool {
 	return false
 }
 
-func (v *PoT) IsInT64(d interface{}) bool {
+func (u *PoT) IsInT64(d interface{}) bool {
 	if reflect.ValueOf(d).Kind() == reflect.Int64 {
 		return true
 	}
@@ -55,7 +55,21 @@ func (v *PoT) IsInT64(d interface{}) bool {
 	return false
 }
 
-func (v *PoT) IsString(d interface{}) bool {
+func (u *PoT) IsEmpty(d interface{}) bool {
+	if u.IsString(d) {
+		if d != "" {
+			return false
+		}
+	} else {
+		if d != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (u *PoT) IsString(d interface{}) bool {
 	if reflect.ValueOf(d).Kind() == reflect.String {
 		return true
 	}
@@ -63,7 +77,7 @@ func (v *PoT) IsString(d interface{}) bool {
 	return false
 }
 
-func (v *PoT) ReflectContains(d ... interface{}) bool {
+func (u *PoT) ReflectContains(d ... interface{}) bool {
 	if len(d) != 2 {
 		return false
 	}
@@ -87,7 +101,7 @@ func (v *PoT) ReflectContains(d ... interface{}) bool {
 	return false
 }
 
-func (v *PoT) SetTimeLocation(d string) (*time.Location, error) {
+func (u *PoT) SetTimeLocation(d string) (*time.Location, error) {
 	if d == "" {
 		d = data.TimeLocation
 	}
@@ -95,7 +109,7 @@ func (v *PoT) SetTimeLocation(d string) (*time.Location, error) {
 	return time.LoadLocation(d)
 }
 
-func (v *PoT) Contains(k interface{}, d ...interface{}) bool {
+func (u *PoT) Contains(k interface{}, d ...interface{}) bool {
 	if len(d) < 1 {
 		return false
 	}
@@ -109,21 +123,21 @@ func (v *PoT) Contains(k interface{}, d ...interface{}) bool {
 	return false
 }
 
-func (v *PoT) ToJson(d interface{}) (interface{}, error) {
+func (u *PoT) ToJson(d interface{}) (interface{}, error) {
 	res, err := json.Marshal(d)
 	if err != nil { return nil, err }
 
 	return string(res), nil
 }
 
-func (v *PoT) ToStruct(d interface{}, res interface{}) error {
+func (u *PoT) ToStruct(d interface{}, res interface{}) error {
 	err := json.Unmarshal([]byte(cast.ToString(d)), res)
 	if err != nil { return err }
 
 	return nil
 }
 
-func (v *PoT) ToMapInterface(d map[string]interface{}) map[interface{}]interface{} {
+func (u *PoT) ToMapInterface(d map[string]interface{}) map[interface{}]interface{} {
 	if d == nil { return nil }
 
 	var res map[interface{}]interface{} = map[interface{}]interface{}{}
@@ -135,7 +149,7 @@ func (v *PoT) ToMapInterface(d map[string]interface{}) map[interface{}]interface
 	return res
 }
 
-func (v *PoT) MergeH(d ... *data.H) *data.H {
+func (u *PoT) MergeH(d ... *data.H) *data.H {
 	h := &data.H{}
 	for _, val := range d {
 		if val != nil {
@@ -148,7 +162,7 @@ func (v *PoT) MergeH(d ... *data.H) *data.H {
 	return h
 }
 
-func (v *PoT) GeTUintPtrFuncPC() (interface{}, interface{}, interface{}) {
+func (u *PoT) GeTUintPtrFuncPC() (interface{}, interface{}, interface{}) {
 	funcPCUintPtr := make([]uintptr, 1)
 	runtime.Callers(2, funcPCUintPtr)
 	funcPCName := runtime.FuncForPC(funcPCUintPtr[0]).Name()
@@ -160,14 +174,14 @@ func (v *PoT) GeTUintPtrFuncPC() (interface{}, interface{}, interface{}) {
 	return srvFuncPCName, ctrFuncPCName[len(ctrFuncPCName)-2], ctrFuncPCName[len(ctrFuncPCName)-1]
 }
 
-func (v *PoT) NumRandom(max int) int {
+func (u *PoT) NumRandom(max int) int {
 	return rand.New(rand.NewSource(time.Now().Unix())).Intn(max)
 }
 
-func (v *PoT) Fprintf(writer io.Writer, format string, d ... interface{}) {
+func (u *PoT) Fprintf(writer io.Writer, format string, d ... interface{}) {
 	fmt.Fprintf(writer, format, d ...)
 }
 
-func (v *PoT) Sprintf(format string, d ... interface{}) string {
+func (u *PoT) Sprintf(format string, d ... interface{}) string {
 	return fmt.Sprintf(format, d ...)
 }

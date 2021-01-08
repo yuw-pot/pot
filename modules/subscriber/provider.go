@@ -15,18 +15,18 @@ type (
 	}
 
 	provider struct {
-		v *utils.PoT
+		u *utils.PoT
 	}
 )
 
 func newProvider() *provider {
 	return &provider{
-		v: utils.New(),
+		u: utils.New(),
 	}
 }
 
-func (srv *provider) do(msg *redis.Message) {
-	if ok := srv.v.Contains(msg.Channel, *keys ...); ok == false {
+func (srv *provider) do(msg *redis.Message, keys *KeYs, channels *Channels) {
+	if ok := srv.u.Contains(msg.Channel, keys); ok == false {
 		return
 	}
 

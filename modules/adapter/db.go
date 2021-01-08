@@ -63,10 +63,7 @@ func (db *odbc) instance() *odbc {
 	)
 
 	engine, err := xorm.NewEngine(cast.ToString(db.dn), conns)
-	if err != nil {
-		if engine != nil { engine.Close() }
-		panic(err)
-	}
+	if err != nil { panic(err) }
 
 	engine.SetMaxOpenConns(db.sParam.MaxOpen) 	// 设置最大打开连接数
 	engine.SetMaxIdleConns(db.sParam.MaxIdle) 	// 设置连接池的空闲数大小

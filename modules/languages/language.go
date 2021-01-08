@@ -10,18 +10,12 @@ import (
 	"golang.org/x/text/message"
 )
 
-type (
-	PoT struct {
-		TranslatePoT *TranslatePoT
-	}
-)
+type PoT struct {
+	TranslatePoT *TranslatePoT
+}
 
 func Translate(key, ln string, replace ... interface{}) string {
 	return message.NewPrinter(language.MustParse(ln)).Sprintf(key, replace ...)
-}
-
-func New() *PoT {
-	return &PoT {}
 }
 
 func (ln *PoT) Initialized() *PoT {

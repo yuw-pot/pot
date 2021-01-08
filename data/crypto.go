@@ -11,7 +11,7 @@ const (
 	SHA1		string = "SHA1"
 	SHA256		string = "SHA256"
 
-	ModeToken	string = "Token"
-	ModeRsA		string = "RsA"
-	ModeAeS		string = "AeS"
+	ModeToken	string = "TOKEN"
+	ModeRsA		string = "RSA"
+	ModeAeS		string = "AES"
 )

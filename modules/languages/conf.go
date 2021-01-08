@@ -15,6 +15,7 @@ var (
 	EN = language.English.String()
 	CN = language.Chinese.String()
 	CA = language.CanadianFrench.String()
+	FR = language.French.String()
 
 	translation *TranslatePoT = &TranslatePoT {
 		EN: {
@@ -28,6 +29,9 @@ var (
 			"tag_iii":	"iii %v 测试 %v",
 		},
 		CA: {
+
+		},
+		FR: {
 
 		},
 	}

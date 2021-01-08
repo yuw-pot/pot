@@ -27,3 +27,24 @@ const (
 	// - Keep Files Counts
 	LogMaxAge 			int = 7
 )
+
+type (
+	/**
+	 * Modules: Logs
+	 */
+	ZLogPoT struct {
+		FileName 		string `yaml:"filename" json:"filename"`
+		ZapCoreLevel 	string `yaml:"zap_core_level" json:"zap_core_level"`
+		Format 			string `yaml:"format" json:"format"`
+		Time 			string `yaml:"time" json:"time"`
+		Level 			string `yaml:"level" json:"level"`
+		Name 			string `yaml:"name" json:"name"`
+		Caller 			string `yaml:"caller" json:"caller"`
+		Message 		string `yaml:"message" json:"message"`
+		StackTrace 		string `yaml:"stacktrace" json:"stack_trace"`
+
+		MaxSize 		int `yaml:"max_size" json:"max_size"`
+		MaxBackups 		int `yaml:"max_backups" json:"max_backups"`
+		MaxAge 			int `yaml:"max_age" json:"max_age"`
+	}
+)

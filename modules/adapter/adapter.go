@@ -26,16 +26,19 @@ const (
 
 type (
 	PoT struct {
-		v 				*utils.PoT
 		sConns 			*srcConns
 		sParam 			*srcParam
 		timeLocation 	*time.Location
+		u 				*utils.PoT
 
 		driver 			interface{}
 	}
 
+	InF struct {
+
+	}
+
 	srcParam struct {
-		Policy 		string
 		MaxOpen 	int
 		MaxIdle 	int
 		ShowedSQL 	bool
@@ -67,8 +70,14 @@ var (
 	}
 )
 
+func Initialized() {
+	adapter := newAdapter()
+	adapter.initialized()
+}
+
 func Conns(driver, label string) (map[interface{}][]*xorm.Engine, error) {
 	var ok bool
+
 	_, ok = adapterMaster[driver]
 	if ok == false {
 		return nil, E.Err(data.ErrPfx, "AdapterMode")
@@ -100,18 +109,15 @@ func Conns(driver, label string) (map[interface{}][]*xorm.Engine, error) {
 	return conns, nil
 }
 
-func New() *PoT {
-	adapter := &PoT{}
-	adapter.v = utils.New()
-
-	return adapter.initialized()
+func newAdapter() *PoT {
+	return &PoT{ u:utils.New() }
 }
 
 func (adapterPoT *PoT) initialized() *PoT {
 	// Set db Time Location
 	//   - GeT Configure
 	adapterTimeLocation := properties.PropertyPoT.GeT("PoT.TimeLocation", data.TimeLocation)
-	d, err := adapterPoT.v.SetTimeLocation(cast.ToString(adapterTimeLocation))
+	d, err := adapterPoT.u.SetTimeLocation(cast.ToString(adapterTimeLocation))
 	if err != nil { panic(err) }
 
 	adapterPoT.timeLocation = d
@@ -154,7 +160,7 @@ func (adapterPoT *PoT) initialized() *PoT {
 				panic(E.Err(data.ErrPfx, "AdapterConfigErr", content))
 			}
 
-			masterTo := adapterPoT.v.ToMapInterface(master.(map[string]interface{}))
+			masterTo := adapterPoT.u.ToMapInterface(master.(map[string]interface{}))
 			masterEngine := adapterPoT.validate(masterTo)
 			if len(masterEngine) != 1 {
 				content := fmt.Sprintf("Adapter.%v.Conns.%v.Master", dn, label)
@@ -182,32 +188,35 @@ func (adapterPoT *PoT) validate(d ... interface{}) []*xorm.Engine {
 		adapterPoT.sConns = &srcConns {
 			Repo:     "",
 			Host:     "",
-			Port:     0,
+			Port:     3306,
 			Username: "",
 			Password: "",
 		}
+
+		var ok bool
+		var v map[interface{}]interface{} = val.(map[interface{}]interface{})
 		
-		repo, ok := val.(map[interface{}]interface{})["repo"]
+		repo, ok := v["repo"]
 		if ok == false {
 			continue
 		}
 
-		host, ok := val.(map[interface{}]interface{})["host"]
+		host, ok := v["host"]
 		if ok == false {
 			continue
 		}
 
-		port, ok := val.(map[interface{}]interface{})["port"]
+		port, ok := v["port"]
 		if ok == false {
 			continue
 		}
 
-		username, ok := val.(map[interface{}]interface{})["username"]
+		username, ok := v["username"]
 		if ok == false {
 			continue
 		}
 
-		password, ok := val.(map[interface{}]interface{})["password"]
+		password, ok := v["password"]
 		if ok == false {
 			continue
 		}

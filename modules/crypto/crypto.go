@@ -4,7 +4,9 @@
 
 package crypto
 
-import "github.com/yuw-pot/pot/data"
+import (
+	"github.com/yuw-pot/pot/data"
+)
 
 type (
 	crypto interface {
@@ -41,6 +43,6 @@ func (cryptoPoT *PoT) Made() (interface{}, error) {
 		return res.made(cryptoPoT.D ...)
 
 	default:
-		return "", nil
+		return nil, nil
 	}
 }
