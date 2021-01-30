@@ -27,8 +27,12 @@ var (
 )
 
 type (
+	InF struct {
+		Conns interface{}
+	}
+
 	adapter interface {
-		initialized()
+		initialized(inf *InF)
 	}
 
 	redisClusterPoT struct {
@@ -54,15 +58,15 @@ type (
 	}
 )
 
-func Initialized() {
+func Initialized(inf *InF) {
 	if len(adapterRedis) == 0 {
 		var singletonClient adapter = newSingleton()
-		singletonClient.initialized()
+		singletonClient.initialized(inf)
 	}
 
 	if len(adapterRedisCluster) == 0 {
 		var clusterClient adapter = newCluster()
-		clusterClient.initialized()
+		clusterClient.initialized(inf)
 	}
 }
 

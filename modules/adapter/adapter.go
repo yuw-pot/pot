@@ -34,10 +34,6 @@ type (
 		driver 			interface{}
 	}
 
-	InF struct {
-
-	}
-
 	srcParam struct {
 		MaxOpen 	int
 		MaxIdle 	int
@@ -71,8 +67,7 @@ var (
 )
 
 func Initialized() {
-	adapter := newAdapter()
-	adapter.initialized()
+	newAdapter().initialized()
 }
 
 func Conns(driver, label string) (map[interface{}][]*xorm.Engine, error) {

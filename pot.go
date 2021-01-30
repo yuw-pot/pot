@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 	"github.com/yuw-pot/pot/data"
+	"github.com/yuw-pot/pot/modules/cache/redis"
 	"github.com/yuw-pot/pot/modules/err"
 	"github.com/yuw-pot/pot/modules/languages"
 	"github.com/yuw-pot/pot/modules/properties"
@@ -27,6 +28,8 @@ type PoT struct {
 	PoTError *err.PoT
 	PoTSubscribers []*subscriber.PoT
 	PoTTranslater *languages.PoT
+
+	InFRedis *redis.InF
 }
 
 func New() *PoT {
@@ -103,6 +106,11 @@ func (d *PoT) PoT() *PoT {
 		ep := new(err.PoT)
 		ep.ErrMsg = d.PoTError.ErrMsg
 		ep.Initialized()
+	}
+
+	// Conf Redis Info
+	if d.InFRedis != nil {
+		redis.Initialized(d.InFRedis)
 	}
 
 	// Subscriber Initialize

@@ -16,9 +16,13 @@ func newCluster() *redisClusterPoT {
 	return &redisClusterPoT{ mx: &sync.Mutex{} }
 }
 
-func (rd *redisClusterPoT) initialized() {
+func (rd *redisClusterPoT) initialized(inf *InF) {
 	cfg := properties.PropertyPoT.GeT("RedisCluster", nil)
-	if cfg == nil { return }
+	if cfg == nil {
+		return
+	}
+
+	if inf != nil {}
 
 	for key, val := range cfg.(map[string]interface{}) {
 		rd.addrs = []string{}

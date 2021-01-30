@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/yuw-pot/pot/data"
 	"github.com/yuw-pot/pot/modules/adapter"
-	"github.com/yuw-pot/pot/modules/cache/redis"
 	"github.com/yuw-pot/pot/modules/err"
 	"github.com/yuw-pot/pot/modules/properties"
 )
@@ -27,7 +26,6 @@ func init() {
 
 	ad.property()
 	ad.adapter()
-	ad.cache()
 }
 
 func ad() *autoload {
@@ -51,6 +49,6 @@ func (ad *autoload) property() {
 	}
 }
 
-func (ad *autoload) adapter() { adapter.Initialized() }
-
-func (ad *autoload) cache() { redis.Initialized() }
+func (ad *autoload) adapter() {
+	adapter.Initialized()
+}

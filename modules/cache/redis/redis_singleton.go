@@ -17,11 +17,18 @@ func newSingleton() *redisPoT {
 	return &redisPoT{ mx: &sync.Mutex{} }
 }
 
-func (rd *redisPoT) initialized() {
-	cfg := properties.PropertyPoT.GeT("Redis", nil)
-	if cfg == nil { return }
+func (rd *redisPoT) initialized(inf *InF) {
+	var rds interface{}
 
-	for key, val := range cfg.(map[string]interface{}) {
+	if inf.Conns != nil && len(inf.Conns.(map[string]interface{})) != 0 {
+		rds = inf.Conns
+	} else {
+		rds = properties.PropertyPoT.GeT("Redis", nil)
+
+	}
+
+	adapterRedis = map[string]*redis.Client{}
+	for key, val := range rds.(map[string]interface{}) {
 		rd.sParams = &srcParams {
 			network:  network,
 			addr:     addr,
@@ -31,7 +38,7 @@ func (rd *redisPoT) initialized() {
 		}
 
 		var ok bool
-		var v map[string]interface{} = val.(map[string]interface{})
+		var v map[interface{}]interface{} = val.(map[interface{}]interface{})
 
 		network, ok := v["network"]
 		if ok {
