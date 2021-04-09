@@ -12,6 +12,7 @@ import (
 	"github.com/yuw-pot/pot/modules/err"
 	"github.com/yuw-pot/pot/modules/languages"
 	"github.com/yuw-pot/pot/modules/properties"
+	"github.com/yuw-pot/pot/modules/queues"
 	"github.com/yuw-pot/pot/modules/subscriber"
 	"github.com/yuw-pot/pot/modules/utils"
 	"github.com/yuw-pot/pot/routes"
@@ -26,6 +27,7 @@ type PoT struct {
 
 	PoTRoute *routes.PoT
 	PoTError *err.PoT
+	PoTQueues []*queues.PoT
 	PoTSubscribers []*subscriber.PoT
 	PoTTranslater *languages.PoT
 
@@ -114,9 +116,16 @@ func (d *PoT) PoT() *PoT {
 	}
 
 	// Subscriber Initialize
-	if d.PoTSubscribers != nil {
+	if d.PoTSubscribers != nil || len(d.PoTSubscribers) == 0 {
 		for _, subscribe := range d.PoTSubscribers {
 			subscriber.Start(subscribe)
+		}
+	}
+
+	// Queue Initialize
+	if d.PoTQueues != nil || len(d.PoTQueues) == 0 {
+		for _, queue := range d.PoTQueues {
+			queues.Start(queue)
 		}
 	}
 

@@ -22,7 +22,10 @@ type Component interface {
 	IsExisT(d interface{}) (bool, error)
 	HSeT(key interface{}, d map[string]interface{}) (interface{}, error)
 	HGeT(key, field string) (interface{}, error)
+	HDeL(key string, val ... string) (interface{}, error)
 	IsHExisT(key, field string) (bool, error)
+	LPush(key string, val ... interface{}) (interface{}, error)
+	RPop(key string) (interface{}, error)
 	Publish(channel string, message interface{}) (interface{}, error)
 	SeTPrefix(pfx string) error
 	GeTPrefix() string

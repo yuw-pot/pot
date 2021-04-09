@@ -37,6 +37,10 @@ func (r *RedisComponent) GeTClient() *redis.Client {
 }
 
 func (r *RedisComponent) KeYs(d ... interface{}) (interface{}, error) {
+	if err := r.check(); err != nil {
+		return nil, err
+	}
+
 	var clientPattern string = "*"
 	if len(d) == 1 {
 		clientPattern = cast.ToString(d[0])
@@ -79,6 +83,10 @@ func (r *RedisComponent) DeL(d interface{}) (interface{}, error) {
 }
 
 func (r *RedisComponent) IsExisT(d interface{}) (bool, error) {
+	if err := r.check(); err != nil {
+		return false, err
+	}
+
 	err := r.client.Get(r.ctx, r.addPrefix(cast.ToString(d))).Err()
 	if err != nil {
 		return false, err
@@ -100,16 +108,48 @@ func (r *RedisComponent) HSeT(key interface{}, d map[string]interface{}) (interf
 }
 
 func (r *RedisComponent) HGeT(key, field string) (interface{}, error) {
+	if err := r.check(); err != nil {
+		return nil, err
+	}
+
 	return r.client.HGet(r.ctx, r.addPrefix(key), field).Result()
 }
 
+func (r *RedisComponent) HDeL(key string, val ... string) (interface{}, error) {
+	if err := r.check(); err != nil {
+		return nil, err
+	}
+
+	return r.client.HDel(r.ctx, key, val ...).Result()
+}
+
 func (r *RedisComponent) IsHExisT(key, field string) (bool, error) {
+	if err := r.check(); err != nil {
+		return false, err
+	}
+
 	err := r.client.HGet(r.ctx, r.addPrefix(key), field).Err()
 	if err != nil {
 		return false, err
 	}
 
 	return true, nil
+}
+
+func (r *RedisComponent) LPush(key string, val ... interface{}) (interface{}, error) {
+	if err := r.check(); err != nil {
+		return nil, err
+	}
+
+	return r.client.LPush(r.ctx, key, val ...).Result()
+}
+
+func (r *RedisComponent) RPop(key string) (interface{}, error) {
+	if err := r.check(); err != nil {
+		return nil, err
+	}
+
+	return r.client.RPop(r.ctx, key).Result()
 }
 
 func (r *RedisComponent) Publish(channel string, message interface{}) (interface{}, error) {

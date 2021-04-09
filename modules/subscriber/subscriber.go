@@ -6,7 +6,7 @@ package subscriber
 
 func Start(subscriberPoT *PoT) {
 	if subscriberPoT.KeYs == nil || subscriberPoT.Pool == nil || subscriberPoT.Channels == nil {
-		return
+		panic("Subscriber Parameters is Nil!")
 	}
 
 	sub := new(subscribed)
@@ -21,17 +21,17 @@ const (
 )
 
 type (
-	subscriber interface {
-		setInfo(info *PoT)
-		sub()
-	}
-
 	KeYs []interface{}
 	Pool struct {
 		Method 	string
 		Config 	interface{}
 	}
 	Channels map[interface{}][]Provider
+
+	subscriber interface {
+		setInfo(info *PoT)
+		sub()
+	}
 
 	PoT struct {
 		KeYs *KeYs
@@ -50,10 +50,6 @@ var (
 )
 
 func (sub *subscribed) do() {
-	if sub.info.Pool.Method != MethodRdS && sub.info.Pool.Method != MethodKfK {
-		return
-	}
-
 	var client subscriber
 
 	switch sub.info.Pool.Method {
